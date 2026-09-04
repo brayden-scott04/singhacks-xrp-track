@@ -1,0 +1,31 @@
+{
+  "name": "bidstream",
+  "version": "0.1.0",
+  "private": true,
+  "description": "BidStream — AI agent that auctions a task among competing LLM providers via HTTP 402 bids and settles the winner on XRPL.",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n agent,openai,anthropic,gemini -c blue,green,magenta,yellow \"tsx watch src/agent/server.ts\" \"tsx watch src/providers/openai/index.ts\" \"tsx watch src/providers/anthropic/index.ts\" \"tsx watch src/providers/gemini/index.ts\"",
+    "setup:wallets": "tsx scripts/setupWallets.ts",
+    "demo": "tsx scripts/demoRun.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "@google/genai": "^0.3.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "openai": "^4.73.0",
+    "ripple-keypairs": "^2.0.0",
+    "uuid": "^11.0.3",
+    "xrpl": "^4.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.1",
+    "concurrently": "^9.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+*.log
+
+# vendored reference repos pulled by the xrpl-agentic-resources skill
+skills/xrpl-agentic-resources/ows/
+skills/xrpl-agentic-resources/rlusd-skills/
+skills/xrpl-agentic-resources/x402-secure/
+skills/xrpl-agentic-resources/xrpl-dev-portal/
+skills/xrpl-agentic-resources/XRPL-Standards/

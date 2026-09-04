@@ -1,0 +1,114 @@
+/**
+ * Scripted, repeatable demo: creates a session, submits a few tasks of
+ * varying complexity, and prints the auction + settlement result for each
+ * by watching the agent's SSE event stream. Requires `npm run dev` running
+ * in another terminal first.
+ */
+
+const AGENT_URL = `http://localhost:${process.env.PORT_AGENT ?? 4000}`;
+
+interface DemoTask {
+  prompt: string;
+  complexityHint: "simple" | "standard" | "complex";
+  budgetUsd: number;
+}
+
+const DEMO_TASKS: DemoTask[] = [
+  { prompt: "Summarize this changelog entry in one sentence: 'Fixed a race condition in the retry queue.'", complexityHint: "simple", budgetUsd: 0.05 },
+  { prompt: "Compare REST and GraphQL for a mobile app backend and explain step by step which you'd recommend and why.", complexityHint: "complex", budgetUsd: 0.5 },
+  { prompt: "Write a one-line Slack status update for someone in a client meeting.", complexityHint: "simple", budgetUsd: 0.02 },
+];
+
+async function createSession(): Promise<string> {
+  const res = await fetch(`${AGENT_URL}/session`, { method: "POST" });
+  if (!res.ok) throw new Error(`failed to create session: ${res.status}`);
+  const body = (await res.json()) as { sessionId: string };
+  return body.sessionId;
+}
+
+function watchEventsUntil(sessionId: string, predicate: (event: any) => boolean, timeoutMs: number): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      controller.abort();
+      reject(new Error("timed out waiting for task to settle"));
+    }, timeoutMs);
+
+    fetch(`${AGENT_URL}/events`, { signal: controller.signal })
+      .then(async (res) => {
+        const reader = res.body!.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n\n");
+          buffer = lines.pop() ?? "";
+          for (const chunk of lines) {
+            const dataLine = chunk.split("\n").find((l) => l.startsWith("data: "));
+            if (!dataLine) continue;
+            const event = JSON.parse(dataLine.slice("data: ".length));
+            if (event.sessionId === sessionId && predicate(event)) {
+              clearTimeout(timer);
+              controller.abort();
+              resolve(event);
+              return;
+            }
+          }
+        }
+      })
+      .catch((err) => {
+        if (!controller.signal.aborted) reject(err);
+      });
+  });
+}
+
+async function runOne(sessionId: string, task: DemoTask, index: number) {
+  console.log(`\n=== Task ${index + 1}: "${task.prompt.slice(0, 60)}..." (budget $${task.budgetUsd}) ===`);
+
+  const submitRes = await fetch(`${AGENT_URL}/session/${sessionId}/task`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(task),
+  });
+  const { taskId } = (await submitRes.json()) as { taskId: string };
+  console.log(`submitted taskId=${taskId}, watching for outcome...`);
+
+  const terminal = await watchEventsUntil(
+    sessionId,
+    (e) => e.taskId === taskId && ["task.completed", "task.rejected", "task.failed"].includes(e.type),
+    30_000,
+  );
+
+  if (terminal.type === "task.completed") {
+    console.log(`✓ completed. Output: ${String(terminal.output).slice(0, 200)}`);
+  } else {
+    console.log(`✗ ${terminal.type}: ${terminal.reason}`);
+  }
+}
+
+async function main() {
+  console.log(`BidStream demo run against ${AGENT_URL}`);
+  const sessionId = await createSession();
+  console.log(`session: ${sessionId}`);
+
+  for (let i = 0; i < DEMO_TASKS.length; i++) {
+    await runOne(sessionId, DEMO_TASKS[i], i);
+  }
+
+  const summary = (await (await fetch(`${AGENT_URL}/session/${sessionId}`)).json()) as {
+    session: { spentUsd: number; capUsd: number; status: string };
+    settlements: Array<{ providerId: string; mode: string; amountUsd: number; explorerUrl: string }>;
+  };
+  console.log(`\n=== Session summary ===`);
+  console.log(`spent: $${summary.session.spentUsd.toFixed(6)} / cap $${summary.session.capUsd} (${summary.session.status})`);
+  for (const s of summary.settlements) {
+    console.log(`- ${s.providerId} via ${s.mode}: $${s.amountUsd.toFixed(6)} — ${s.explorerUrl}`);
+  }
+}
+
+main().catch((err) => {
+  console.error("demo run failed:", err instanceof Error ? err.message : err);
+  process.exit(1);
+});
