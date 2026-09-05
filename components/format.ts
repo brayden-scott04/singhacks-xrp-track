@@ -81,7 +81,7 @@ export function fmtDrops(drops: string): string {
 
 export function dropsToXrp(drops: string): string {
   const n = Number(drops);
-  if (!Number.isFinite(n)) return "—";
+  if (!Number.isFinite(n)) return "n/a";
   return `${(n / 1_000_000).toFixed(6)} XRP`;
 }
 
@@ -106,7 +106,7 @@ export function fmtDuration(ms: number): string {
 /** Wall-clock only. Relative times must be computed after mount. */
 export function fmtClock(value: string | number | Date): string {
   const d = value instanceof Date ? value : new Date(value);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "n/a";
   return clock.format(d);
 }
 

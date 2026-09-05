@@ -15,7 +15,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { initialRoundsState, roundsReducer } from "./roundsReducer";
 
 const TAGLINE =
-  "Four industry agents bid via HTTP 402. A decision agent picks the winner. XRPL settles it, and every payment carries its own justification.";
+  "Four industry agents bid on every task using HTTP 402. A decision agent picks the winner, XRPL pays them, and every payment records why it was made.";
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => null);

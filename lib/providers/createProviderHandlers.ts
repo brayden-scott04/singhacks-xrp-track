@@ -79,7 +79,7 @@ export function createProviderHandlers({ pricing, callFn }: ProviderHandlerConfi
 
     const quote = await consumeQuote(pricing.providerId, taskId, quoteId);
     if (!quote) {
-      return NextResponse.json({ error: "quote expired or unknown — request a fresh /quote" }, { status: 410 });
+      return NextResponse.json({ error: "Quote expired or unknown. Request a fresh /quote." }, { status: 410 });
     }
 
     try {

@@ -8,7 +8,7 @@ import { selectRanked, type BidOutcome, type Round, type RoundBid } from "./roun
 
 const OUTCOME: Record<BidOutcome, { label: string; tone: PillTone; icon: typeof CheckIcon }> = {
   pending: { label: "Bidding", tone: "neutral", icon: DotIcon },
-  bid: { label: "Bid in", tone: "neutral", icon: DotIcon },
+  bid: { label: "Bid placed", tone: "neutral", icon: DotIcon },
   considered: { label: "Considered", tone: "neutral", icon: DotIcon },
   won: { label: "Won", tone: "accent", icon: CheckIcon },
   "rejected-budget": { label: "Over budget", tone: "warn", icon: BanIcon },
@@ -38,7 +38,7 @@ function BidDetails({ entry }: { entry: RoundBid }) {
   const b = entry.bid;
   if (!b) return null;
   return (
-    <Disclosure summary="Quote detail">
+    <Disclosure summary="Quote details">
       <p className="bid-justification">{b.qualityJustification}</p>
       <dl className="kv">
         <div>
@@ -122,8 +122,10 @@ export function BidFeed({ round }: { round: Round }) {
 
       {anyExcluded || anyRejected ? (
         <p className="legend">
-          {anyExcluded ? <span>No bid — the agent errored or timed out and sat this round out.</span> : null}
-          {anyRejected ? <span>Over budget — the bid exceeded the task&rsquo;s remaining budget and was gated out.</span> : null}
+          {anyExcluded ? <span>No bid means the agent errored or timed out, so it sat this round out.</span> : null}
+          {anyRejected ? (
+            <span>Over budget means the bid came in above what was left of the budget, so it could not win.</span>
+          ) : null}
         </p>
       ) : null}
     </div>

@@ -39,7 +39,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
       type: "task.rejected",
       sessionId: task.sessionId,
       taskId: task.taskId,
-      reason: "session is paused on spend cap — resume before submitting more tasks",
+      reason: "Session is paused at the spend cap. Resume it before submitting more tasks.",
     });
     return null;
   }
@@ -70,7 +70,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
       type: "task.rejected",
       sessionId: task.sessionId,
       taskId: task.taskId,
-      reason: "every bid exceeded the remaining budget — raise the budget and retry",
+      reason: "Every bid came in above the remaining budget. Raise the budget and try again.",
     });
     return null;
   }
@@ -108,7 +108,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
       type: "task.rejected",
       sessionId: task.sessionId,
       taskId: task.taskId,
-      reason: "settlement would exceed the session spend cap — session paused, resume to continue",
+      reason: "Settling this task would go over the session spend cap, so the session is paused. Resume it to continue.",
     });
     return null;
   }

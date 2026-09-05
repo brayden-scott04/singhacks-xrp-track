@@ -247,7 +247,7 @@ export function roundsReducer(state: RoundsState, action: RoundsAction): RoundsS
 
     case "settlement.fallback":
       return patch(withRound, action.taskId, {
-        ...withNote(round, { kind: "warn", text: `Channel settlement failed — ${action.reason}`, at: action.at }),
+        ...withNote(round, { kind: "warn", text: `Channel settlement failed: ${action.reason}`, at: action.at }),
         fallbackReason: action.reason,
       });
 
@@ -334,12 +334,12 @@ export const FACTOR_LABEL: Record<FactorKey, string> = {
 
 export const FACTOR_HINT: Record<FactorKey, string> = {
   quality: "Self-reported quality tier for the model",
-  errorRate: "Inverted rolling execution error rate — higher is more reliable",
+  errorRate: "Rolling error rate, inverted, so higher means more reliable",
   price: "Relative to the most expensive bid this round",
   knowledge: "Self-reported domain knowledge tier",
   contextWindow: "Relative to the largest context window this round",
   speed: "Self-reported throughput tier",
-  load: "Inverted current load — higher means less busy",
+  load: "Current load, inverted, so higher means less busy",
 };
 
 /** score x weight per factor, descending: what actually decided the round. */

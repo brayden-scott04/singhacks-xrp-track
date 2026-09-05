@@ -91,7 +91,7 @@ export function MemoView({ memo, settlement }: { memo: MemoPayload | null; settl
             <span className="mono">{fmtScore(memo.taskComplexityScore)}</span>
           </div>
 
-          <Disclosure summary="Raw memo JSON, as encoded on-chain">
+          <Disclosure summary="The raw JSON written to the ledger">
             <div className="memo-raw-head">
               <CopyButton value={JSON.stringify(memo, null, 2)} label="Copy memo JSON" />
             </div>

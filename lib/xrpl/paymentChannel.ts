@@ -101,7 +101,7 @@ export async function settleViaChannel(
     const signature = signChannelClaim(state.channelId, cumulativeStr, wallets.agent.privateKey);
     const verified = verifyChannelClaim(state.channelId, cumulativeStr, signature, wallets.agent.publicKey);
     if (!verified) {
-      throw new Error(`Off-chain claim signature failed local verification for channel ${state.channelId} — refusing to settle`);
+      throw new Error(`Off-chain claim signature failed local verification for channel ${state.channelId}. Refusing to settle.`);
     }
 
     const providerWallet = wallets.providers[providerId];

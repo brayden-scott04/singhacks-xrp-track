@@ -71,7 +71,7 @@ export function TaskForm({
     // Each of these used to be a silent `return` that left the button
     // looking live and the user with no idea why nothing happened.
     if (!sessionId) {
-      setError("Session is still starting — wait for the Live indicator, then try again.");
+      setError("The session is still starting. Wait for the Live indicator, then try again.");
       return;
     }
     if (!trimmed) {
@@ -83,7 +83,7 @@ export function TaskForm({
     if (!Number.isFinite(budgetUsd) || budgetUsd <= 0) {
       // A blank budget previously sent null, and the server substituted the
       // entire remaining cap — a spending surprise dressed as a no-op.
-      setError("Enter a budget greater than $0.00.");
+      setError("Enter a budget above $0.00.");
       return;
     }
 
@@ -177,7 +177,8 @@ export function TaskForm({
 
         {sseStatus !== "open" && !error ? (
           <p className="field-hint warn-hint">
-            Live updates are {sseStatus}. You can still submit — results will appear once the stream reconnects.
+            Live updates are {sseStatus}. You can still submit, and results will appear once the stream
+            reconnects.
           </p>
         ) : null}
 
