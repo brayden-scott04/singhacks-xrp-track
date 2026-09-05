@@ -64,7 +64,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
     return null;
   }
 
-  const decision = decide(bids, budgetRemainingUsd);
+  const decision = await decide(bids, budgetRemainingUsd, task.prompt.slice(0, 300));
   if (!decision || decision.rejectedForBudget.length === bids.length) {
     await publish({
       type: "task.rejected",

@@ -15,6 +15,7 @@ const envSchema = z.object({
   XRPL_SEED_PROVIDER_OPENAI: optionalString(),
   XRPL_SEED_PROVIDER_ANTHROPIC: optionalString(),
   XRPL_SEED_PROVIDER_GEMINI: optionalString(),
+  XRPL_SEED_PROVIDER_DEEPSEEK: optionalString(),
 
   XRPL_NETWORK: z.string().default("wss://s.altnet.rippletest.net:51233"),
   SETTLEMENT_MODE: z.enum(["channel", "payment"]).default("channel"),

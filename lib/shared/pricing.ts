@@ -70,6 +70,18 @@ export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
     speedScore: 0.9,
     contextWindowTokens: 1_048_576,
   },
+  deepseek: {
+    providerId: "deepseek",
+    modelId: "deepseek/deepseek-chat",
+    pricePerInputTokenUsd: 0.32 / 1_000_000,
+    pricePerOutputTokenUsd: 0.89 / 1_000_000,
+    qualityScore: 0.75,
+    qualityJustification: "DeepSeek V3 tier — strong reasoning at a mid-low price point",
+    loadScore: 0.45,
+    knowledgeScore: 0.78,
+    speedScore: 0.65,
+    contextWindowTokens: 163_840,
+  },
 };
 
 /** Cheap, deterministic token estimate: ~4 chars/token, never zero. */

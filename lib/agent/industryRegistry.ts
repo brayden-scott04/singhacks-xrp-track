@@ -31,6 +31,12 @@ const INDUSTRY_PROFILES: Record<IndustryAgentId, IndustryProfile> = {
     name: "Finance",
     description: "Financial analysis and reporting specialist",
   },
+  technology: {
+    industryId: "technology",
+    providerId: "deepseek",
+    name: "Technology",
+    description: "Software engineering and technical analysis specialist",
+  },
 };
 
 export function allIndustryIds(): readonly IndustryAgentId[] {

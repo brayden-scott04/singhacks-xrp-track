@@ -9,6 +9,7 @@ const WALLETS: Array<{ envKey: string; label: string }> = [
   { envKey: "XRPL_SEED_PROVIDER_OPENAI", label: "openai provider (receiver)" },
   { envKey: "XRPL_SEED_PROVIDER_ANTHROPIC", label: "anthropic provider (receiver)" },
   { envKey: "XRPL_SEED_PROVIDER_GEMINI", label: "gemini provider (receiver)" },
+  { envKey: "XRPL_SEED_PROVIDER_DEEPSEEK", label: "deepseek provider (receiver)" },
 ];
 
 function appendSeedToEnv(envKey: string, seed: string): void {

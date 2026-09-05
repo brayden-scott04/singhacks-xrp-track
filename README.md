@@ -12,8 +12,8 @@ Built for the Ripple / SingHacks "AI-Native Business on XRPL" hackathon.
 Teams running multi-model AI pipelines pick a provider once and stick with
 it, regardless of whether a cheaper or better-fit provider is available for a
 given task. BidStream's agent re-shops the market on every single task: it
-broadcasts a bid request to three real LLM providers (OpenAI, Anthropic,
-Google), each of which answers with a genuine **HTTP 402 Payment Required**
+broadcasts a bid request to four real LLM providers (OpenAI, Anthropic,
+Google, DeepSeek), each of which answers with a genuine **HTTP 402 Payment Required**
 carrying its price-per-token and quality signal for that specific task — the
 402 challenge *is* the bid. A decision engine picks a winner on
 price-vs-quality-vs-remaining-budget, not just cheapest, executes the task on
@@ -24,7 +24,7 @@ bid, its quality score, and the task's complexity score — a self-contained,
 inspectable justification for the spend.
 
 Remove the agent and the product doesn't just slow down — it stops working:
-no one re-shops three AI providers by hand per request, and no one approves a
+no one re-shops four AI providers by hand per request, and no one approves a
 sub-cent payment manually at that volume.
 
 See [docs/architecture.md](docs/architecture.md) for the full diagram, the
@@ -41,10 +41,10 @@ cp .env.example .env
 
 Fill in `.env`:
 
-- `OPENROUTER_API_KEY` — all three bidding providers call OpenRouter's
+- `OPENROUTER_API_KEY` — all four bidding providers call OpenRouter's
   unified OpenAI-compatible endpoint with this one key. Get one at
   https://openrouter.ai/keys
-- Leave the `XRPL_SEED_*` values blank, then generate and faucet-fund four
+- Leave the `XRPL_SEED_*` values blank, then generate and faucet-fund five
   testnet wallets (one agent payer, one receiver per provider):
 
   ```bash

@@ -1,13 +1,23 @@
 import { computeCompositeScore, normalizeFactors } from "../shared/scoringWeights";
 import type { DecisionResult, IndustryAgentId, IndustryBid, ScoredIndustryBid } from "../shared/types";
+import { chooseWinnerWithLLM, DECISION_MODEL_ID } from "./decisionModel";
 
 /**
- * Picks a winner among competing industry agents on a fixed-weight composite
- * of seven factors (price, load, quality, knowledge, speed, error %, context
- * window — see lib/shared/scoringWeights.ts). budgetFit is a hard gate: a
- * bid over the customer's remaining budget cannot win regardless of score.
+ * Picks a winner among competing industry agents. First computes a
+ * deterministic fixed-weight composite of seven factors (price, load,
+ * quality, knowledge, speed, error %, context window — see
+ * lib/shared/scoringWeights.ts) as a strong prior; budgetFit is a hard gate
+ * (a bid over the remaining budget can't win regardless of score). Then the
+ * decision agent — a slightly stronger LLM than any bidder — makes the
+ * actual call among the budget-eligible candidates, falling back to the top
+ * composite score if that call fails or is skipped (fewer than 2 eligible
+ * candidates, or no OPENROUTER_API_KEY configured).
  */
-export function decide(bids: IndustryBid[], budgetRemainingUsd: number): DecisionResult | null {
+export async function decide(
+  bids: IndustryBid[],
+  budgetRemainingUsd: number,
+  taskPromptPreview: string,
+): Promise<DecisionResult | null> {
   if (bids.length === 0) return null;
 
   const scored: ScoredIndustryBid[] = bids.map((bid) => {
@@ -31,16 +41,25 @@ export function decide(bids: IndustryBid[], budgetRemainingUsd: number): Decisio
     return { winner: scored[0], score: 0, reason: "all bids exceeded remaining budget", ranked, rejectedForBudget };
   }
 
-  const winnerEntry = [...eligible].sort(
+  const deterministicWinner = [...eligible].sort(
     (a, b) => b.score - a.score || a.bid.estimatedTotalCostUsd - b.bid.estimatedTotalCostUsd,
   )[0];
 
+  const llmDecision = await chooseWinnerWithLLM(taskPromptPreview, eligible);
+  const winnerEntry = llmDecision
+    ? (eligible.find((r) => r.bid.industryId === llmDecision.winnerIndustryId) ?? deterministicWinner)
+    : deterministicWinner;
+
   const f = winnerEntry.bid.factorScores;
+  const scoreSummary =
+    `composite score ${winnerEntry.score.toFixed(3)} (price ${f.price.toFixed(2)}, quality ${f.quality.toFixed(2)}, ` +
+    `error% ${f.errorRate.toFixed(2)}, knowledge ${f.knowledge.toFixed(2)}, context ${f.contextWindow.toFixed(2)}, ` +
+    `speed ${f.speed.toFixed(2)}, load ${f.load.toFixed(2)}) — $${winnerEntry.bid.estimatedTotalCostUsd.toFixed(6)}`;
+
   const reason =
-    `${winnerEntry.bid.industryId} agent won with composite score ${winnerEntry.score.toFixed(3)} ` +
-    `(price ${f.price.toFixed(2)}, quality ${f.quality.toFixed(2)}, error% ${f.errorRate.toFixed(2)}, ` +
-    `knowledge ${f.knowledge.toFixed(2)}, context ${f.contextWindow.toFixed(2)}, speed ${f.speed.toFixed(2)}, ` +
-    `load ${f.load.toFixed(2)}) — $${winnerEntry.bid.estimatedTotalCostUsd.toFixed(6)}`;
+    llmDecision && winnerEntry.bid.industryId === llmDecision.winnerIndustryId
+      ? `decision agent (${DECISION_MODEL_ID}) chose ${winnerEntry.bid.industryId}: ${llmDecision.reason} [${scoreSummary}]`
+      : `${winnerEntry.bid.industryId} agent won on ${scoreSummary}`;
 
   return {
     winner: winnerEntry.bid,

@@ -13,7 +13,7 @@ export interface LlmCallResult {
  * three, using the same `openai` SDK pointed at OpenRouter's base URL.
  * modelId here is the OpenRouter slug, e.g. "anthropic/claude-haiku-4.5".
  */
-function openRouterClient(): OpenAI {
+export function openRouterClient(): OpenAI {
   return new OpenAI({
     apiKey: requireEnv("OPENROUTER_API_KEY"),
     baseURL: "https://openrouter.ai/api/v1",
@@ -46,6 +46,10 @@ export async function callAnthropic(prompt: string, modelId: string): Promise<Ll
 }
 
 export async function callGemini(prompt: string, modelId: string): Promise<LlmCallResult> {
+  return callViaOpenRouter(prompt, modelId);
+}
+
+export async function callDeepSeek(prompt: string, modelId: string): Promise<LlmCallResult> {
   return callViaOpenRouter(prompt, modelId);
 }
 

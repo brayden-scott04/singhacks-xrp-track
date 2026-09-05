@@ -1,4 +1,4 @@
-export const PROVIDER_IDS = ["openai", "anthropic", "gemini"] as const;
+export const PROVIDER_IDS = ["openai", "anthropic", "gemini", "deepseek"] as const;
 export type ProviderId = (typeof PROVIDER_IDS)[number];
 
 /**
@@ -7,7 +7,7 @@ export type ProviderId = (typeof PROVIDER_IDS)[number];
  * (see lib/agent/industryRegistry.ts) — the provider itself stays unaware of
  * which industry it's being used for.
  */
-export const INDUSTRY_AGENT_IDS = ["legal", "healthcare", "finance"] as const;
+export const INDUSTRY_AGENT_IDS = ["legal", "healthcare", "finance", "technology"] as const;
 export type IndustryAgentId = (typeof INDUSTRY_AGENT_IDS)[number];
 
 export type ComplexityHint = "simple" | "standard" | "complex";

@@ -5,6 +5,7 @@ const PROVIDER_ROUTES: Record<ProviderId, { quote: string; execute: string }> = 
   openai: { quote: "/api/providers/openai/quote", execute: "/api/providers/openai/execute" },
   anthropic: { quote: "/api/providers/anthropic/quote", execute: "/api/providers/anthropic/execute" },
   gemini: { quote: "/api/providers/gemini/quote", execute: "/api/providers/gemini/execute" },
+  deepseek: { quote: "/api/providers/deepseek/quote", execute: "/api/providers/deepseek/execute" },
 };
 
 /**

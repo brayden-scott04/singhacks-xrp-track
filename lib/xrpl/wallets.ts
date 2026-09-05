@@ -9,7 +9,14 @@ export interface AgentWallets {
 
 let cached: AgentWallets | null = null;
 
-function loadWallet(envKey: "XRPL_SEED_AGENT" | "XRPL_SEED_PROVIDER_OPENAI" | "XRPL_SEED_PROVIDER_ANTHROPIC" | "XRPL_SEED_PROVIDER_GEMINI"): Wallet {
+function loadWallet(
+  envKey:
+    | "XRPL_SEED_AGENT"
+    | "XRPL_SEED_PROVIDER_OPENAI"
+    | "XRPL_SEED_PROVIDER_ANTHROPIC"
+    | "XRPL_SEED_PROVIDER_GEMINI"
+    | "XRPL_SEED_PROVIDER_DEEPSEEK",
+): Wallet {
   let seed: string;
   try {
     seed = requireEnv(envKey);
@@ -19,7 +26,7 @@ function loadWallet(envKey: "XRPL_SEED_AGENT" | "XRPL_SEED_PROVIDER_OPENAI" | "X
   return Wallet.fromSeed(seed);
 }
 
-/** Loads all four wallets from seeds in .env. Never logs a seed — only classicAddress is safe to print. */
+/** Loads all five wallets from seeds in .env. Never logs a seed — only classicAddress is safe to print. */
 export function loadAgentWallets(): AgentWallets {
   if (cached) return cached;
   cached = {
@@ -28,6 +35,7 @@ export function loadAgentWallets(): AgentWallets {
       openai: loadWallet("XRPL_SEED_PROVIDER_OPENAI"),
       anthropic: loadWallet("XRPL_SEED_PROVIDER_ANTHROPIC"),
       gemini: loadWallet("XRPL_SEED_PROVIDER_GEMINI"),
+      deepseek: loadWallet("XRPL_SEED_PROVIDER_DEEPSEEK"),
     },
   };
   return cached;
