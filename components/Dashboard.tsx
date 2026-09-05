@@ -17,9 +17,9 @@ interface RoundsState {
 
 type RoundsAction =
   | { type: "task.submitted"; taskId: string; prompt: string; budgetUsd: number }
-  | { type: "bid.received"; taskId: string; providerId: string; text: string }
-  | { type: "bid.excluded"; taskId: string; providerId: string; text: string }
-  | { type: "decision.made"; taskId: string; winnerProviderId: string; rejectedForBudget: string[]; suffix: string }
+  | { type: "bid.received"; taskId: string; industryId: string; text: string }
+  | { type: "bid.excluded"; taskId: string; industryId: string; text: string }
+  | { type: "decision.made"; taskId: string; winnerIndustryId: string; rejectedForBudget: string[]; suffix: string }
   | { type: "note"; taskId: string; suffix: string };
 
 function ensureRound(state: RoundsState, taskId: string): RoundsState {
@@ -44,7 +44,7 @@ function roundsReducer(state: RoundsState, action: RoundsAction): RoundsState {
         ...withRound,
         byId: {
           ...withRound.byId,
-          [action.taskId]: { ...round, rows: [...round.rows, { providerId: action.providerId, text: action.text }] },
+          [action.taskId]: { ...round, rows: [...round.rows, { industryId: action.industryId, text: action.text }] },
         },
       };
     case "bid.excluded":
@@ -54,14 +54,14 @@ function roundsReducer(state: RoundsState, action: RoundsAction): RoundsState {
           ...withRound.byId,
           [action.taskId]: {
             ...round,
-            rows: [...round.rows, { providerId: action.providerId, text: action.text, className: "excluded" }],
+            rows: [...round.rows, { industryId: action.industryId, text: action.text, className: "excluded" }],
           },
         },
       };
     case "decision.made": {
       const rows = round.rows.map((row) => {
-        if (row.providerId === action.winnerProviderId) return { ...row, className: "winner" };
-        if (action.rejectedForBudget.includes(row.providerId)) return { ...row, className: "rejected" };
+        if (row.industryId === action.winnerIndustryId) return { ...row, className: "winner" };
+        if (action.rejectedForBudget.includes(row.industryId)) return { ...row, className: "rejected" };
         return row;
       });
       return {
@@ -116,8 +116,11 @@ export function Dashboard() {
         dispatch({
           type: "bid.received",
           taskId: evt.taskId,
-          providerId: b.providerId,
-          text: `${b.providerId} (${b.modelId}) — $${fmtUsd(b.estimatedTotalCostUsd)} @ quality ${b.qualityScore.toFixed(2)}`,
+          industryId: b.industryId,
+          text:
+            `${b.industryId} (${b.providerId}/${b.modelId}) — $${fmtUsd(b.estimatedTotalCostUsd)} | ` +
+            `quality ${b.qualityScore.toFixed(2)} | knowledge ${b.knowledgeScore.toFixed(2)} | speed ${b.speedScore.toFixed(2)} | ` +
+            `load ${b.loadScore.toFixed(2)} | error% ${b.errorRatePct.toFixed(1)} | ctx ${b.contextWindowTokens.toLocaleString()}`,
         });
         break;
       }
@@ -125,8 +128,8 @@ export function Dashboard() {
         dispatch({
           type: "bid.excluded",
           taskId: evt.taskId,
-          providerId: evt.excluded.providerId,
-          text: `${evt.excluded.providerId} excluded — ${evt.excluded.reason}`,
+          industryId: evt.excluded.industryId,
+          text: `${evt.excluded.industryId} excluded — ${evt.excluded.reason}`,
         });
         break;
       }
@@ -134,9 +137,9 @@ export function Dashboard() {
         dispatch({
           type: "decision.made",
           taskId: evt.taskId,
-          winnerProviderId: evt.decision.winner.providerId,
+          winnerIndustryId: evt.decision.winner.industryId,
           rejectedForBudget: evt.decision.rejectedForBudget,
-          suffix: ` — winner: ${evt.decision.winner.providerId} (${evt.decision.reason})`,
+          suffix: ` — winner: ${evt.decision.winner.industryId} (${evt.decision.reason})`,
         });
         break;
       }

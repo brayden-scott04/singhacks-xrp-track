@@ -3,6 +3,7 @@ import { executeResponseSchema } from "../shared/bidProtocol";
 import { scoreComplexity } from "../shared/complexity";
 import { estimateOutputTokens, estimateTokens } from "../shared/pricing";
 import type { MemoPayload, ProviderId, SettlementRecord, Task, TaskResult } from "../shared/types";
+import { recordOutcome } from "../store/agentStatsStore";
 import { publish } from "../store/eventBus";
 import { getSession, recordSettlement, saveSession } from "../store/sessionStore";
 import { settleViaChannel, usdToDrops } from "../xrpl/paymentChannel";
@@ -63,7 +64,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
     return null;
   }
 
-  const decision = decide(bids, complexityScore, budgetRemainingUsd);
+  const decision = decide(bids, budgetRemainingUsd);
   if (!decision || decision.rejectedForBudget.length === bids.length) {
     await publish({
       type: "task.rejected",
@@ -77,9 +78,22 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
   await publish({ type: "decision.made", sessionId: task.sessionId, taskId: task.taskId, decision });
 
   const winner = decision.winner;
-  await publish({ type: "settlement.started", sessionId: task.sessionId, taskId: task.taskId, providerId: winner.providerId });
+  await publish({
+    type: "settlement.started",
+    sessionId: task.sessionId,
+    taskId: task.taskId,
+    providerId: winner.providerId,
+    industryId: winner.industryId,
+  });
 
-  const execution = await executeOnWinner(winner.providerId, task.taskId, winner.quoteId, task.prompt);
+  let execution;
+  try {
+    execution = await executeOnWinner(winner.providerId, task.taskId, winner.quoteId, task.prompt);
+    recordOutcome(winner.industryId, true);
+  } catch (err) {
+    recordOutcome(winner.industryId, false);
+    throw err;
+  }
 
   // Settlement uses the originally quoted cost — what was literally bid and
   // memo'd — not the actual usage, so the on-chain record always matches the
@@ -101,10 +115,13 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
 
   const memo: MemoPayload = {
     providerId: winner.providerId,
+    industryId: winner.industryId,
     bidPricePerInputTokenUsd: winner.pricePerInputTokenUsd,
     bidPricePerOutputTokenUsd: winner.pricePerOutputTokenUsd,
     bidTotalCostUsd: winner.estimatedTotalCostUsd,
     qualityScore: winner.qualityScore,
+    factorScores: winner.factorScores,
+    compositeScore: winner.compositeScore,
     taskComplexityScore: complexityScore,
     taskId: task.taskId,
     winningReason: decision.reason,
@@ -122,6 +139,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
       settlement = {
         taskId: task.taskId,
         providerId: winner.providerId,
+        industryId: winner.industryId,
         mode: "channel",
         txHash: result.txHash,
         amountDrops: result.amountDrops,
@@ -136,6 +154,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
       settlement = {
         taskId: task.taskId,
         providerId: winner.providerId,
+        industryId: winner.industryId,
         mode: "payment",
         txHash: result.txHash,
         amountDrops: result.amountDrops,
@@ -150,6 +169,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
     settlement = {
       taskId: task.taskId,
       providerId: winner.providerId,
+      industryId: winner.industryId,
       mode: "payment",
       txHash: result.txHash,
       amountDrops: result.amountDrops,

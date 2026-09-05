@@ -26,7 +26,12 @@ async function createSession(): Promise<string> {
   return body.sessionId;
 }
 
-function watchEventsUntil(sessionId: string, predicate: (event: any) => boolean, timeoutMs: number): Promise<any> {
+function watchEventsUntil(
+  sessionId: string,
+  predicate: (event: any) => boolean,
+  timeoutMs: number,
+  onEvent?: (event: any) => void,
+): Promise<any> {
   return new Promise((resolve, reject) => {
     const controller = new AbortController();
     const timer = setTimeout(() => {
@@ -49,11 +54,14 @@ function watchEventsUntil(sessionId: string, predicate: (event: any) => boolean,
             const dataLine = chunk.split("\n").find((l) => l.startsWith("data: "));
             if (!dataLine) continue;
             const event = JSON.parse(dataLine.slice("data: ".length));
-            if (event.sessionId === sessionId && predicate(event)) {
-              clearTimeout(timer);
-              controller.abort();
-              resolve(event);
-              return;
+            if (event.sessionId === sessionId) {
+              onEvent?.(event);
+              if (predicate(event)) {
+                clearTimeout(timer);
+                controller.abort();
+                resolve(event);
+                return;
+              }
             }
           }
         }
@@ -79,6 +87,25 @@ async function runOne(sessionId: string, task: DemoTask, index: number) {
     sessionId,
     (e) => e.taskId === taskId && ["task.completed", "task.rejected", "task.failed"].includes(e.type),
     30_000,
+    (e) => {
+      if (e.taskId === taskId && e.type === "decision.made") {
+        console.log("-- Industry agent scoring --");
+        console.table(
+          e.decision.ranked.map((r: any) => ({
+            industry: r.bid.industryId,
+            price: r.bid.factorScores.price.toFixed(2),
+            load: r.bid.factorScores.load.toFixed(2),
+            quality: r.bid.factorScores.quality.toFixed(2),
+            knowledge: r.bid.factorScores.knowledge.toFixed(2),
+            speed: r.bid.factorScores.speed.toFixed(2),
+            "error%": r.bid.factorScores.errorRate.toFixed(2),
+            context: r.bid.factorScores.contextWindow.toFixed(2),
+            composite: r.score.toFixed(3),
+            budgetFit: r.budgetFit,
+          })),
+        );
+      }
+    },
   );
 
   if (terminal.type === "task.completed") {

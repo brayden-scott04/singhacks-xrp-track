@@ -10,6 +10,12 @@ import type { ProviderId } from "./types";
  * faster tiers score lower, larger tiers score higher), not a live benchmark.
  * It stands in for the "confidence signal" a real provider would attach to
  * its 402 quote.
+ *
+ * loadScore/knowledgeScore/speedScore are the same kind of static stand-in,
+ * extended to the industry-agent decision layer's other self-reported
+ * factors — loadScore is 0..1 "how busy this agent claims to be right now"
+ * (higher = busier = worse), knowledgeScore/speedScore are 0..1 "higher is
+ * better" tier signals. contextWindowTokens is real, published model spec.
  */
 export interface ModelPricing {
   providerId: ProviderId;
@@ -18,6 +24,10 @@ export interface ModelPricing {
   pricePerOutputTokenUsd: number;
   qualityScore: number;
   qualityJustification: string;
+  loadScore: number;
+  knowledgeScore: number;
+  speedScore: number;
+  contextWindowTokens: number;
 }
 
 export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
@@ -28,6 +38,10 @@ export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
     pricePerOutputTokenUsd: 0.6 / 1_000_000,
     qualityScore: 0.62,
     qualityJustification: "cost-tier general model — fast, cheap, solid on straightforward tasks",
+    loadScore: 0.35,
+    knowledgeScore: 0.6,
+    speedScore: 0.85,
+    contextWindowTokens: 128_000,
   },
   anthropic: {
     providerId: "anthropic",
@@ -36,6 +50,10 @@ export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
     pricePerOutputTokenUsd: 5.0 / 1_000_000,
     qualityScore: 0.8,
     qualityJustification: "current-gen Haiku tier — stronger reasoning, mid price point",
+    loadScore: 0.5,
+    knowledgeScore: 0.85,
+    speedScore: 0.55,
+    contextWindowTokens: 200_000,
   },
   gemini: {
     providerId: "gemini",
@@ -44,6 +62,10 @@ export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
     pricePerOutputTokenUsd: 0.4 / 1_000_000,
     qualityScore: 0.58,
     qualityJustification: "cheapest tier in the pool — fastest, most price-competitive bidder",
+    loadScore: 0.3,
+    knowledgeScore: 0.55,
+    speedScore: 0.9,
+    contextWindowTokens: 1_048_576,
   },
 };
 

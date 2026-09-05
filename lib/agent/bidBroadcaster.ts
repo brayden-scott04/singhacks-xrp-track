@@ -1,15 +1,18 @@
 import { env } from "../shared/env";
 import { quoteResponseSchema, type QuoteRequest } from "../shared/bidProtocol";
-import type { Bid, ExcludedBid, ProviderId } from "../shared/types";
+import type { ExcludedBid, IndustryAgentId, IndustryBid } from "../shared/types";
+import { getErrorRatePct } from "../store/agentStatsStore";
 import { publish } from "../store/eventBus";
-import { allProviderIds, providerUrl } from "./providerRegistry";
+import { allIndustryIds, industryProfile } from "./industryRegistry";
+import { providerUrl } from "./providerRegistry";
 
 export interface BroadcastResult {
-  bids: Bid[];
+  bids: IndustryBid[];
   excluded: ExcludedBid[];
 }
 
-async function quoteFromProvider(providerId: ProviderId, request: QuoteRequest): Promise<Bid> {
+async function quoteFromIndustry(industryId: IndustryAgentId, request: QuoteRequest): Promise<IndustryBid> {
+  const { providerId } = industryProfile(industryId);
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), env.PROVIDER_QUOTE_TIMEOUT_MS);
 
@@ -32,31 +35,32 @@ async function quoteFromProvider(providerId: ProviderId, request: QuoteRequest):
       throw new Error(`malformed quote body from ${providerId}`);
     }
 
-    return parsed.data;
+    return { ...parsed.data, industryId, errorRatePct: getErrorRatePct(industryId) };
   } finally {
     clearTimeout(timer);
   }
 }
 
 /**
- * Fans out /quote to every registered provider in parallel. A timeout,
- * network error, or malformed response excludes that provider from this
- * round only — the task proceeds with whoever else responded.
+ * Fans out /quote to every industry agent's backing provider in parallel. A
+ * timeout, network error, or malformed response excludes that industry agent
+ * from this round only — the task proceeds with whoever else responded.
  */
 export async function broadcastQuotes(sessionId: string, taskId: string, request: QuoteRequest): Promise<BroadcastResult> {
-  const results = await Promise.allSettled(allProviderIds().map((providerId) => quoteFromProvider(providerId, request)));
+  const industries = allIndustryIds();
+  const results = await Promise.allSettled(industries.map((industryId) => quoteFromIndustry(industryId, request)));
 
-  const bids: Bid[] = [];
+  const bids: IndustryBid[] = [];
   const excluded: ExcludedBid[] = [];
 
   for (const [index, result] of results.entries()) {
-    const providerId = allProviderIds()[index];
+    const industryId = industries[index];
     if (result.status === "fulfilled") {
       bids.push(result.value);
       await publish({ type: "bid.received", sessionId, taskId, bid: result.value });
     } else {
       const reason = result.reason instanceof Error ? result.reason.message : String(result.reason);
-      const excludedBid: ExcludedBid = { providerId, reason };
+      const excludedBid: ExcludedBid = { industryId, reason };
       excluded.push(excludedBid);
       await publish({ type: "bid.excluded", sessionId, taskId, excluded: excludedBid });
     }

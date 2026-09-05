@@ -10,7 +10,8 @@
     "start": "next start",
     "setup:wallets": "tsx scripts/setupWallets.ts",
     "demo": "tsx scripts/demoRun.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
@@ -30,6 +31,7 @@
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
   }
 }

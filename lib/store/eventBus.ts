@@ -1,11 +1,11 @@
 import { EventEmitter } from "node:events";
-import type { Bid, DecisionResult, ExcludedBid, SessionState, SettlementRecord } from "../shared/types";
+import type { DecisionResult, ExcludedBid, IndustryAgentId, IndustryBid, ProviderId, SessionState, SettlementRecord } from "../shared/types";
 
 export type BidStreamEvent =
-  | { type: "bid.received"; sessionId: string; taskId: string; bid: Bid }
+  | { type: "bid.received"; sessionId: string; taskId: string; bid: IndustryBid }
   | { type: "bid.excluded"; sessionId: string; taskId: string; excluded: ExcludedBid }
   | { type: "decision.made"; sessionId: string; taskId: string; decision: DecisionResult }
-  | { type: "settlement.started"; sessionId: string; taskId: string; providerId: string }
+  | { type: "settlement.started"; sessionId: string; taskId: string; providerId: ProviderId; industryId: IndustryAgentId }
   | { type: "settlement.confirmed"; sessionId: string; taskId: string; settlement: SettlementRecord }
   | { type: "settlement.fallback"; sessionId: string; taskId: string; reason: string }
   | { type: "session.warning"; sessionId: string; session: SessionState }

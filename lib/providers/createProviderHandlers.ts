@@ -46,6 +46,10 @@ export function createProviderHandlers({ pricing, callFn }: ProviderHandlerConfi
       estimatedTotalCostUsd,
       qualityScore: pricing.qualityScore,
       qualityJustification: pricing.qualityJustification,
+      loadScore: pricing.loadScore,
+      knowledgeScore: pricing.knowledgeScore,
+      speedScore: pricing.speedScore,
+      contextWindowTokens: pricing.contextWindowTokens,
       expiresAt: new Date(Date.now() + QUOTE_TTL_MS).toISOString(),
     });
 

@@ -1,7 +1,7 @@
 "use client";
 
 export interface BidRow {
-  providerId: string;
+  industryId: string;
   text: string;
   className?: string;
 }
@@ -15,9 +15,9 @@ export interface Round {
 export function BidFeed({ rounds }: { rounds: Round[] }) {
   return (
     <section className="panel" id="bids-panel">
-      <h2>Live bids</h2>
+      <h2>Industry agent bids</h2>
       <div id="bid-feed" className="feed">
-        {rounds.length === 0 && <p className="empty">Submit a task to see providers bid.</p>}
+        {rounds.length === 0 && <p className="empty">Submit a task to see industry agents bid.</p>}
         {rounds.map((round) => (
           <div className="bid-round" key={round.taskId}>
             <div className="bid-round-title">{round.title}</div>

@@ -13,10 +13,13 @@ function fromHex(hex: string): string {
 
 const REQUIRED_FIELDS: Array<keyof MemoPayload> = [
   "providerId",
+  "industryId",
   "bidPricePerInputTokenUsd",
   "bidPricePerOutputTokenUsd",
   "bidTotalCostUsd",
   "qualityScore",
+  "factorScores",
+  "compositeScore",
   "taskComplexityScore",
   "taskId",
   "winningReason",

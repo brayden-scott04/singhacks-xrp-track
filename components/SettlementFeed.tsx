@@ -14,7 +14,7 @@ export function SettlementFeed({ settlements }: { settlements: SettlementRecord[
         {settlements.length === 0 && <p className="empty">No settlements yet.</p>}
         {settlements.map((s, i) => (
           <div key={i} className={`payment-row${s.mode === "payment" && s.fallbackReason ? " fallback" : ""}`}>
-            <strong>{s.providerId}</strong> via {s.mode}
+            <strong>{s.industryId}</strong> ({s.providerId}) via {s.mode}
             {s.fallbackReason ? " (fallback)" : ""} — ${fmtUsd(s.amountUsd)} —{" "}
             <a href={s.explorerUrl} target="_blank" rel="noopener noreferrer">
               {s.txHash.slice(0, 12)}…

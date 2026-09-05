@@ -25,6 +25,10 @@ export const quoteResponseSchema = z.object({
   estimatedTotalCostUsd: z.number().positive(),
   qualityScore: z.number().min(0).max(1),
   qualityJustification: z.string().min(1),
+  loadScore: z.number().min(0).max(1),
+  knowledgeScore: z.number().min(0).max(1),
+  speedScore: z.number().min(0).max(1),
+  contextWindowTokens: z.number().int().positive(),
   expiresAt: z.string(),
 });
 export type QuoteResponse = z.infer<typeof quoteResponseSchema>;
