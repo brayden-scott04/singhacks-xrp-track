@@ -1,3 +1,4 @@
+import { capitalize } from "../shared/format";
 import { computeCompositeScore, normalizeFactors } from "../shared/scoringWeights";
 import type { DecisionResult, IndustryAgentId, IndustryBid, ScoredIndustryBid } from "../shared/types";
 import { chooseWinnerWithLLM, DECISION_MODEL_ID } from "./decisionModel";
@@ -54,12 +55,12 @@ export async function decide(
   const scoreSummary =
     `composite score ${winnerEntry.score.toFixed(3)} (price ${f.price.toFixed(2)}, quality ${f.quality.toFixed(2)}, ` +
     `error% ${f.errorRate.toFixed(2)}, knowledge ${f.knowledge.toFixed(2)}, context ${f.contextWindow.toFixed(2)}, ` +
-    `speed ${f.speed.toFixed(2)}, load ${f.load.toFixed(2)}) — $${winnerEntry.bid.estimatedTotalCostUsd.toFixed(6)}`;
+    `speed ${f.speed.toFixed(2)}, load ${f.load.toFixed(2)}), $${winnerEntry.bid.estimatedTotalCostUsd.toFixed(6)}`;
 
   const reason =
     llmDecision && winnerEntry.bid.industryId === llmDecision.winnerIndustryId
-      ? `decision agent (${DECISION_MODEL_ID}) chose ${winnerEntry.bid.industryId}: ${llmDecision.reason} [${scoreSummary}]`
-      : `${winnerEntry.bid.industryId} agent won on ${scoreSummary}`;
+      ? `Decision agent (${DECISION_MODEL_ID}) chose ${capitalize(winnerEntry.bid.industryId)}: ${llmDecision.reason} [${scoreSummary}]`
+      : `${capitalize(winnerEntry.bid.industryId)} agent won on ${scoreSummary}`;
 
   return {
     winner: winnerEntry.bid,

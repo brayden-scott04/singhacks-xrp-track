@@ -8,7 +8,7 @@ import {
   type RoundsAction,
   type RoundsState,
 } from "./roundsReducer";
-import type { DecisionResult, FactorScores, IndustryAgentId, IndustryBid, ScoredIndustryBid } from "@/lib/shared/types";
+import { INDUSTRY_AGENT_IDS, type DecisionResult, type FactorScores, type IndustryAgentId, type IndustryBid, type ScoredIndustryBid } from "@/lib/shared/types";
 
 const FACTORS: FactorScores = {
   price: 0.9,
@@ -78,7 +78,9 @@ describe("roundsReducer", () => {
   it("seeds every industry agent as pending so the auction fills in live", () => {
     const state = run([submitted]);
     const round = state.byId.t1;
-    expect(round.bids).toHaveLength(4);
+    // Not hardcoded to a count: INDUSTRY_AGENT_IDS grew from 4 to 5 (added "general")
+    // after this test was written, and the literal silently went stale.
+    expect(round.bids).toHaveLength(INDUSTRY_AGENT_IDS.length);
     expect(round.bids.every((b) => b.outcome === "pending")).toBe(true);
     expect(round.phase).toBe("bidding");
   });

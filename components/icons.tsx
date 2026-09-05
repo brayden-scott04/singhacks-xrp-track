@@ -162,11 +162,19 @@ export const CpuIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const SparklesIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2 2M16 16l2 2M18 6l-2 2M8 16l-2 2" />
+    <circle cx="12" cy="12" r="2.5" />
+  </Svg>
+);
+
 const INDUSTRY_ICONS: Record<IndustryAgentId, (p: IconProps) => React.JSX.Element> = {
   legal: ScaleIcon,
   healthcare: HeartPulseIcon,
   finance: TrendingUpIcon,
   technology: CpuIcon,
+  general: SparklesIcon,
 };
 
 export function IndustryIcon({ industryId, ...rest }: IconProps & { industryId: IndustryAgentId }) {

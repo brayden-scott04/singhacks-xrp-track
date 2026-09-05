@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useSSE, type SseStatus } from "@/hooks/useSSE";
 import type { SessionState, SettlementRecord } from "@/lib/shared/types";
@@ -179,6 +180,9 @@ export function Dashboard() {
         </div>
         <div className="app-head-actions">
           <ConnectionPill status={sseStatus} />
+          <Link className="btn-ghost" href="/history">
+            History
+          </Link>
           <ThemeToggle />
         </div>
       </header>

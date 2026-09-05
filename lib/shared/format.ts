@@ -16,3 +16,9 @@ export function fmtUsd(n: number): string {
 export function fmtScore(n: number): string {
   return n.toFixed(2);
 }
+
+/** Capitalizes the first letter of a single category word (an industry id, a status, a settlement mode). Not a full title-case for prose. */
+export function capitalize(word: string): string {
+  if (!word) return word;
+  return word.charAt(0).toUpperCase() + word.slice(1);
+}
