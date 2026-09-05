@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/hook/agents/claude-code/stop-hook.mjs\""
+            "command": "XRPL_FEEDBACK_CONFIG=\"$CLAUDE_PROJECT_DIR/hook/.xrpl-feedback-hook.json\" node \"$CLAUDE_PROJECT_DIR/hook/agents/claude-code/stop-hook.mjs\""
           }
         ]
       }

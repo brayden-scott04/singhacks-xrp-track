@@ -6,6 +6,7 @@ const PROVIDER_ROUTES: Record<ProviderId, { quote: string; execute: string }> = 
   anthropic: { quote: "/api/providers/anthropic/quote", execute: "/api/providers/anthropic/execute" },
   gemini: { quote: "/api/providers/gemini/quote", execute: "/api/providers/gemini/execute" },
   deepseek: { quote: "/api/providers/deepseek/quote", execute: "/api/providers/deepseek/execute" },
+  meta: { quote: "/api/providers/meta/quote", execute: "/api/providers/meta/execute" },
 };
 
 /**

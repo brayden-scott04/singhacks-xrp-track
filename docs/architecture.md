@@ -76,7 +76,7 @@ that file.
 
 ## XRPL settlement
 
-- **Wallets** (`src/agent/xrpl/wallets.ts`): four testnet wallets — one agent
+- **Wallets** (`src/agent/xrpl/wallets.ts`): six testnet wallets — one agent
   payer, one receiver per provider — generated and faucet-funded by
   `scripts/setupWallets.ts`, seeds held only in the gitignored `.env` file per
   the XRPL Agent Wallet skill's non-negotiables (never logged, never written
