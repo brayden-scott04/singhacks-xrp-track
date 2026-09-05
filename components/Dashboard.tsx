@@ -94,6 +94,10 @@ export function Dashboard() {
       case "settlement.confirmed":
         dispatch({ type: "settlement.confirmed", taskId: evt.taskId, settlement: evt.settlement, at });
         setSettlements((prev) => [evt.settlement, ...prev]);
+        // The server only publishes session.* when the status changes to
+        // warning or paused, so without this the spend bar reads $0.00 for
+        // an entire demo. A resync corrects any drift.
+        setSession((prev) => (prev ? { ...prev, spentUsd: prev.spentUsd + evt.settlement.amountUsd } : prev));
         setLiveMessage(`Settled on XRPL to the ${evt.settlement.industryId} agent`);
         break;
       case "task.completed":
