@@ -15,7 +15,8 @@ function loadWallet(
     | "XRPL_SEED_PROVIDER_OPENAI"
     | "XRPL_SEED_PROVIDER_ANTHROPIC"
     | "XRPL_SEED_PROVIDER_GEMINI"
-    | "XRPL_SEED_PROVIDER_DEEPSEEK",
+    | "XRPL_SEED_PROVIDER_DEEPSEEK"
+    | "XRPL_SEED_PROVIDER_META",
 ): Wallet {
   let seed: string;
   try {
@@ -26,7 +27,7 @@ function loadWallet(
   return Wallet.fromSeed(seed);
 }
 
-/** Loads all five wallets from seeds in .env. Never logs a seed — only classicAddress is safe to print. */
+/** Loads all six wallets from seeds in .env. Never logs a seed — only classicAddress is safe to print. */
 export function loadAgentWallets(): AgentWallets {
   if (cached) return cached;
   cached = {
@@ -36,6 +37,7 @@ export function loadAgentWallets(): AgentWallets {
       anthropic: loadWallet("XRPL_SEED_PROVIDER_ANTHROPIC"),
       gemini: loadWallet("XRPL_SEED_PROVIDER_GEMINI"),
       deepseek: loadWallet("XRPL_SEED_PROVIDER_DEEPSEEK"),
+      meta: loadWallet("XRPL_SEED_PROVIDER_META"),
     },
   };
   return cached;

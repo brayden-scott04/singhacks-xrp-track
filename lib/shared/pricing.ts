@@ -82,6 +82,18 @@ export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
     speedScore: 0.65,
     contextWindowTokens: 163_840,
   },
+  meta: {
+    providerId: "meta",
+    modelId: "meta-llama/llama-3.3-70b-instruct",
+    pricePerInputTokenUsd: 0.12 / 1_000_000,
+    pricePerOutputTokenUsd: 0.3 / 1_000_000,
+    qualityScore: 0.7,
+    qualityJustification: "broad general-purpose tier — versatile across mixed or unclassified tasks, not domain-specialized",
+    loadScore: 0.4,
+    knowledgeScore: 0.65,
+    speedScore: 0.75,
+    contextWindowTokens: 128_000,
+  },
 };
 
 /** Cheap, deterministic token estimate: ~4 chars/token, never zero. */

@@ -37,6 +37,12 @@ const INDUSTRY_PROFILES: Record<IndustryAgentId, IndustryProfile> = {
     name: "Technology",
     description: "Software engineering and technical analysis specialist",
   },
+  general: {
+    industryId: "general",
+    providerId: "meta",
+    name: "General",
+    description: "General-purpose specialist for everyday queries outside legal, healthcare, finance, and technology",
+  },
 };
 
 export function allIndustryIds(): readonly IndustryAgentId[] {

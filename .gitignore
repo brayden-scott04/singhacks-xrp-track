@@ -5,6 +5,9 @@ dist/
 .env.local
 *.log
 
+# XRPL feedback hook identity config (project-scoped variant)
+hook/.xrpl-feedback-hook.json
+
 # Next.js
 /.next/
 /out/

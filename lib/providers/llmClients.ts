@@ -53,4 +53,8 @@ export async function callDeepSeek(prompt: string, modelId: string): Promise<Llm
   return callViaOpenRouter(prompt, modelId);
 }
 
+export async function callMeta(prompt: string, modelId: string): Promise<LlmCallResult> {
+  return callViaOpenRouter(prompt, modelId);
+}
+
 void env; // ensures env is validated as soon as a provider route imports this module
