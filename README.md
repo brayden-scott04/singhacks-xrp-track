@@ -7,9 +7,7 @@ carrying a Memo that records *why* it won.
 
 Built for the Ripple / SingHacks "AI-Native Business on XRPL" track. Testnet only.
 
-![The BidStream dashboard: a task submission form on the left with complexity
-and budget controls, and the live audit memo and XRPL settlement panels on the
-right.](docs/dashboard.png)
+![The BidStream dashboard: a task submission form with complexity and budget controls on the left, and the live audit memo and XRPL settlement panels on the right.](docs/dashboard.png)
 
 ## Why
 
