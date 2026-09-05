@@ -587,6 +587,10 @@ pre#memo-view {
   font-size: var(--text-xs);
   font-weight: var(--weight-medium);
   cursor: pointer;
+  /* .btn-ghost is used on <a> as well as <button>: without this the link
+     renders underlined next to an identical-looking button. */
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .btn-icon {
@@ -708,6 +712,15 @@ pre#memo-view {
   align-items: center;
   gap: var(--space-2);
   flex: none;
+  flex-wrap: wrap;
+}
+
+/* Reserves room for the widest label so the button does not jitter when the
+   theme flips, or when "Theme" resolves to "Dark"/"Light" on mount. */
+.btn-ghost-label {
+  display: inline-block;
+  min-width: 3.1em;
+  text-align: left;
 }
 
 .layout {
