@@ -1,105 +1,62 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, useState } from "react";
-import { useSSE } from "@/hooks/useSSE";
-import type { MemoPayload, SessionState, SettlementRecord } from "@/lib/shared/types";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useSSE, type SseStatus } from "@/hooks/useSSE";
+import type { SessionState, SettlementRecord } from "@/lib/shared/types";
 import type { BidStreamEvent } from "@/lib/store/eventBus";
-import { BidFeed, type Round } from "./BidFeed";
+import { AlertIcon, DotIcon } from "./icons";
+import { EmptyState, Pill } from "./ui";
 import { MemoView } from "./MemoView";
+import { RoundCard } from "./RoundCard";
 import { SessionBar } from "./SessionBar";
 import { SettlementFeed } from "./SettlementFeed";
 import { TaskForm } from "./TaskForm";
+import { ThemeToggle } from "./ThemeToggle";
+import { initialRoundsState, roundsReducer } from "./roundsReducer";
 
-interface RoundsState {
-  order: string[]; // taskId, newest first
-  byId: Record<string, Round>;
-}
-
-type RoundsAction =
-  | { type: "task.submitted"; taskId: string; prompt: string; budgetUsd: number }
-  | { type: "bid.received"; taskId: string; industryId: string; text: string }
-  | { type: "bid.excluded"; taskId: string; industryId: string; text: string }
-  | { type: "decision.made"; taskId: string; winnerIndustryId: string; rejectedForBudget: string[]; suffix: string }
-  | { type: "note"; taskId: string; suffix: string };
-
-function ensureRound(state: RoundsState, taskId: string): RoundsState {
-  if (state.byId[taskId]) return state;
-  return {
-    order: [taskId, ...state.order],
-    byId: { ...state.byId, [taskId]: { taskId, title: "", rows: [] } },
-  };
-}
-
-function roundsReducer(state: RoundsState, action: RoundsAction): RoundsState {
-  const withRound = ensureRound(state, action.taskId);
-  const round = withRound.byId[action.taskId];
-
-  switch (action.type) {
-    case "task.submitted": {
-      const title = `"${action.prompt.slice(0, 70)}" — budget $${action.budgetUsd.toFixed(2)}`;
-      return { ...withRound, byId: { ...withRound.byId, [action.taskId]: { ...round, title } } };
-    }
-    case "bid.received":
-      return {
-        ...withRound,
-        byId: {
-          ...withRound.byId,
-          [action.taskId]: { ...round, rows: [...round.rows, { industryId: action.industryId, text: action.text }] },
-        },
-      };
-    case "bid.excluded":
-      return {
-        ...withRound,
-        byId: {
-          ...withRound.byId,
-          [action.taskId]: {
-            ...round,
-            rows: [...round.rows, { industryId: action.industryId, text: action.text, className: "excluded" }],
-          },
-        },
-      };
-    case "decision.made": {
-      const rows = round.rows.map((row) => {
-        if (row.industryId === action.winnerIndustryId) return { ...row, className: "winner" };
-        if (action.rejectedForBudget.includes(row.industryId)) return { ...row, className: "rejected" };
-        return row;
-      });
-      return {
-        ...withRound,
-        byId: { ...withRound.byId, [action.taskId]: { ...round, title: round.title + action.suffix, rows } },
-      };
-    }
-    case "note":
-      return {
-        ...withRound,
-        byId: { ...withRound.byId, [action.taskId]: { ...round, title: round.title + action.suffix } },
-      };
-    default:
-      return state;
-  }
-}
-
-function fmtUsd(n: number): string {
-  return n.toFixed(6);
-}
+const TAGLINE =
+  "Four industry agents bid via HTTP 402. A decision agent picks the winner. XRPL settles it, and every payment carries its own justification.";
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => null);
   if (!res.ok) {
-    const message = body && typeof body === "object" && "error" in body ? String(body.error) : `request failed (${res.status})`;
+    const message =
+      body && typeof body === "object" && "error" in body ? String(body.error) : `request failed (${res.status})`;
     throw new Error(message);
   }
   return body as T;
+}
+
+function ConnectionPill({ status }: { status: SseStatus }) {
+  if (status === "open") {
+    return (
+      <Pill tone="accent" icon={DotIcon}>
+        Live
+      </Pill>
+    );
+  }
+  return (
+    <Pill tone="warn" icon={DotIcon}>
+      {status === "connecting" ? "Connecting" : "Reconnecting"}
+    </Pill>
+  );
 }
 
 export function Dashboard() {
   const [session, setSession] = useState<SessionState | null>(null);
   const [sessionError, setSessionError] = useState<string | null>(null);
   const [settlements, setSettlements] = useState<SettlementRecord[]>([]);
-  const [memo, setMemo] = useState<MemoPayload | null>(null);
-  const [rounds, dispatch] = useReducer(roundsReducer, { order: [], byId: {} });
+  const [rounds, dispatch] = useReducer(roundsReducer, initialRoundsState);
+  const [liveMessage, setLiveMessage] = useState("");
+
+  // StrictMode mounts effects twice in dev; without this guard the dashboard
+  // creates two sessions and the second one silently wins.
+  const sessionRequested = useRef(false);
 
   useEffect(() => {
+    if (sessionRequested.current) return;
+    sessionRequested.current = true;
+
     fetch("/api/session", { method: "POST" })
       .then((res) => parseJsonOrThrow<SessionState>(res))
       .then((s) => {
@@ -110,107 +67,154 @@ export function Dashboard() {
   }, []);
 
   const handleEvent = useCallback((evt: BidStreamEvent) => {
+    const at = Date.now();
     switch (evt.type) {
-      case "bid.received": {
-        const b = evt.bid;
+      case "bid.received":
+        dispatch({ type: "bid.received", taskId: evt.taskId, bid: evt.bid, at });
+        break;
+      case "bid.excluded":
+        dispatch({ type: "bid.excluded", taskId: evt.taskId, excluded: evt.excluded, at });
+        break;
+      case "decision.made":
+        dispatch({ type: "decision.made", taskId: evt.taskId, decision: evt.decision, at });
+        setLiveMessage(`${evt.decision.winner.industryId} agent won the auction`);
+        break;
+      case "settlement.started":
         dispatch({
-          type: "bid.received",
+          type: "settlement.started",
           taskId: evt.taskId,
-          industryId: b.industryId,
-          text:
-            `${b.industryId} (${b.providerId}/${b.modelId}) — $${fmtUsd(b.estimatedTotalCostUsd)} | ` +
-            `quality ${b.qualityScore.toFixed(2)} | knowledge ${b.knowledgeScore.toFixed(2)} | speed ${b.speedScore.toFixed(2)} | ` +
-            `load ${b.loadScore.toFixed(2)} | error% ${b.errorRatePct.toFixed(1)} | ctx ${b.contextWindowTokens.toLocaleString()}`,
+          providerId: evt.providerId,
+          industryId: evt.industryId,
+          at,
         });
         break;
-      }
-      case "bid.excluded": {
-        dispatch({
-          type: "bid.excluded",
-          taskId: evt.taskId,
-          industryId: evt.excluded.industryId,
-          text: `${evt.excluded.industryId} excluded — ${evt.excluded.reason}`,
-        });
+      case "settlement.fallback":
+        dispatch({ type: "settlement.fallback", taskId: evt.taskId, reason: evt.reason, at });
         break;
-      }
-      case "decision.made": {
-        dispatch({
-          type: "decision.made",
-          taskId: evt.taskId,
-          winnerIndustryId: evt.decision.winner.industryId,
-          rejectedForBudget: evt.decision.rejectedForBudget,
-          suffix: ` — winner: ${evt.decision.winner.industryId} (${evt.decision.reason})`,
-        });
-        break;
-      }
-      case "settlement.confirmed": {
+      case "settlement.confirmed":
+        dispatch({ type: "settlement.confirmed", taskId: evt.taskId, settlement: evt.settlement, at });
         setSettlements((prev) => [evt.settlement, ...prev]);
-        setMemo(evt.settlement.memo);
+        setLiveMessage(`Settled on XRPL to the ${evt.settlement.industryId} agent`);
         break;
-      }
-      case "settlement.fallback": {
-        dispatch({ type: "note", taskId: evt.taskId, suffix: ` — channel failed, falling back to Payment (${evt.reason})` });
+      case "task.completed":
+        dispatch({ type: "task.completed", taskId: evt.taskId, output: evt.output, at });
+        setLiveMessage("Answer received");
         break;
-      }
+      case "task.rejected":
+        dispatch({ type: "task.rejected", taskId: evt.taskId, reason: evt.reason, at });
+        setLiveMessage(`Task rejected: ${evt.reason}`);
+        break;
+      case "task.failed":
+        dispatch({ type: "task.failed", taskId: evt.taskId, reason: evt.reason, at });
+        setLiveMessage(`Task failed: ${evt.reason}`);
+        break;
       case "session.warning":
       case "session.paused":
-      case "session.resumed": {
+      case "session.resumed":
         setSession(evt.session);
         break;
-      }
-      case "task.rejected":
-      case "task.failed": {
-        dispatch({ type: "note", taskId: evt.taskId, suffix: ` — ${evt.type}: ${evt.reason}` });
-        break;
-      }
     }
   }, []);
 
-  useSSE("/api/events", (evt) => {
-    if (session && evt.sessionId === session.sessionId) handleEvent(evt);
-  });
+  const sessionId = session?.sessionId ?? null;
+
+  /**
+   * Repairs what a reconnect gap can lose. The stream has no replay, so an
+   * in-flight round's bids are unrecoverable — this restores only the state
+   * that has a GET endpoint.
+   */
+  const resync = useCallback(() => {
+    if (!sessionId) return;
+    fetch(`/api/session/${sessionId}`)
+      .then((res) => parseJsonOrThrow<{ session: SessionState; settlements: SettlementRecord[] }>(res))
+      .then(({ session: s, settlements: list }) => {
+        setSession(s);
+        setSettlements([...list].reverse());
+      })
+      .catch(() => {
+        // a failed resync is not worth surfacing; the stream is already back
+      });
+  }, [sessionId]);
+
+  const sseStatus = useSSE(
+    "/api/events",
+    (evt) => {
+      if (sessionId && evt.sessionId === sessionId) handleEvent(evt);
+    },
+    resync,
+  );
 
   const handleResume = useCallback(async () => {
-    if (!session) return;
+    if (!sessionId) return;
     try {
-      const res = await fetch(`/api/session/${session.sessionId}/resume`, { method: "POST" });
-      const updated = await parseJsonOrThrow<SessionState>(res);
-      setSession(updated);
+      const res = await fetch(`/api/session/${sessionId}/resume`, { method: "POST" });
+      setSession(await parseJsonOrThrow<SessionState>(res));
       setSessionError(null);
     } catch (err) {
       setSessionError(err instanceof Error ? err.message : String(err));
     }
-  }, [session]);
+  }, [sessionId]);
 
   const handleSubmitted = useCallback(
-    ({ taskId, prompt, budgetUsd }: { taskId: string; prompt: string; budgetUsd: number }) => {
-      dispatch({ type: "task.submitted", taskId, prompt, budgetUsd });
+    (task: { taskId: string; prompt: string; complexityHint: "simple" | "standard" | "complex"; budgetUsd: number }) => {
+      dispatch({ type: "task.submitted", ...task, at: Date.now() });
+      setLiveMessage("Task submitted, auction open");
     },
     [],
   );
 
-  const orderedRounds = rounds.order.map((id) => rounds.byId[id]);
+  const orderedRounds = useMemo(() => rounds.order.map((id) => rounds.byId[id]), [rounds]);
+  const latestMemo = settlements[0]?.memo ?? null;
 
   return (
     <>
-      <header>
-        <h1>BidStream</h1>
-        <p className="tagline">
-          AI providers bid via HTTP 402. XRPL settles the winner. Every payment carries its own justification.
-        </p>
+      <header className="app-head">
+        <div className="app-head-main">
+          <h1>BidStream</h1>
+          <p className="tagline">{TAGLINE}</p>
+        </div>
+        <div className="app-head-actions">
+          <ConnectionPill status={sseStatus} />
+          <ThemeToggle />
+        </div>
       </header>
-      {sessionError && (
-        <section className="panel" style={{ borderColor: "var(--danger)", color: "var(--danger)" }}>
-          <strong>Session error:</strong> {sessionError}
+
+      {sessionError ? (
+        <section className="banner banner-danger" role="alert">
+          <p className="banner-title">
+            <AlertIcon size={16} />
+            Session error
+          </p>
+          <p className="banner-body">{sessionError}</p>
         </section>
-      )}
-      <SessionBar session={session} onResume={handleResume} />
-      <main>
-        <TaskForm sessionId={session?.sessionId ?? null} onSubmitted={handleSubmitted} />
-        <BidFeed rounds={orderedRounds} />
-        <SettlementFeed settlements={settlements} />
-        <MemoView memo={memo} />
-      </main>
+      ) : null}
+
+      <div className="layout">
+        <main id="main">
+          <TaskForm sessionId={sessionId} sseStatus={sseStatus} onSubmitted={handleSubmitted} />
+
+          <section className="rounds" aria-label="Auction rounds">
+            {orderedRounds.length === 0 ? (
+              <EmptyState
+                title="No auctions yet"
+                hint="Submit a task and four industry agents will bid on it in parallel."
+              />
+            ) : (
+              orderedRounds.map((round) => <RoundCard key={round.taskId} round={round} />)
+            )}
+          </section>
+        </main>
+
+        <aside className="rail" aria-label="Session and ledger">
+          <SessionBar session={session} onResume={handleResume} />
+          <MemoView memo={latestMemo} />
+          <SettlementFeed settlements={settlements} />
+        </aside>
+      </div>
+
+      <div role="status" aria-live="polite" className="sr-only">
+        {liveMessage}
+      </div>
     </>
   );
 }
