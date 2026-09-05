@@ -729,6 +729,114 @@ pre#memo-view {
   scroll-margin-top: var(--space-6);
 }
 
+/* --- collapsed round --- */
+
+.round-pill {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-regular);
+  text-align: left;
+  cursor: pointer;
+  scroll-margin-top: var(--space-6);
+  transition:
+    border-color var(--dur-fast) var(--ease-standard),
+    background var(--dur-fast) var(--ease-standard);
+}
+
+.round-pill:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+  filter: none;
+}
+
+.round-pill[data-phase="failed"],
+.round-pill[data-phase="rejected"] {
+  border-color: var(--danger-border);
+  background: var(--danger-weak);
+}
+
+.round-pill-winner,
+.round-pill-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex: none;
+  font-weight: var(--weight-semibold);
+  text-transform: capitalize;
+}
+
+.round-pill-winner {
+  color: var(--accent);
+}
+
+.round-pill-status {
+  color: var(--danger);
+}
+
+.round-pill-winner.dim {
+  color: var(--fg-subtle);
+}
+
+.round-pill-amount {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  color: var(--fg-muted);
+}
+
+.round-pill-prompt {
+  flex: 1;
+  min-width: 0;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.round-pill-chevron {
+  flex: none;
+  color: var(--fg-subtle);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.round-pill-chevron.open {
+  transform: rotate(90deg);
+}
+
+/* Makes the expanded round's header a full-width toggle without changing how
+   it looks. */
+.round-toggle {
+  display: block;
+  width: 100%;
+  padding: 0;
+  min-height: 0;
+  background: transparent;
+  color: inherit;
+  border: none;
+  border-radius: var(--radius-md);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.round-toggle:hover {
+  filter: none;
+}
+
+.round-toggle:hover .round-pill-chevron {
+  color: var(--fg);
+}
+
 .round-head {
   display: flex;
   justify-content: space-between;

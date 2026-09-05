@@ -117,7 +117,7 @@ export function HistoryDetailPanel({ taskId, onClose }: Props) {
             const { round, memo, settlement } = historyRowToRound(entry);
             return (
               <>
-                <RoundCard round={round} />
+                <RoundCard round={round} expanded onToggle={() => {}} />
                 <MemoView memo={memo} settlement={settlement} />
                 {settlement ? <LedgerVerify taskId={entry.taskId} txHash={settlement.txHash} /> : null}
               </>

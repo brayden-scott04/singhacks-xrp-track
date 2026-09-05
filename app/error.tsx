@@ -21,7 +21,7 @@ export default function DashboardError({ error, reset }: { error: Error; reset: 
       </p>
       <p className="banner-body">{error.message || "Unknown error."}</p>
       <p className="banner-body">
-        The agent and its XRPL settlement run server-side and are unaffected — this is a UI fault only.
+        The agent and its XRPL settlement run on the server and are unaffected. This is a display problem only.
       </p>
       <button type="button" onClick={reset}>
         Reload dashboard

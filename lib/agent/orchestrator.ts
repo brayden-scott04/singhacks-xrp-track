@@ -88,7 +88,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
   }
 
   if (isPaused(session)) {
-    const reason = "session is paused on spend cap, resume before submitting more tasks";
+    const reason = "Session is paused at the spend cap. Resume it before submitting more tasks.";
     await publish({ type: "task.rejected", sessionId: task.sessionId, taskId: task.taskId, reason });
     historyStore.recordTaskHistory(baseHistoryDraft(task, "rejected", reason));
     return null;
@@ -137,7 +137,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
 
     if (!decision || decision.rejectedForBudget.length === bids.length) {
       draft.status = "rejected";
-      draft.failureReason = "every bid exceeded the remaining budget, raise the budget and retry";
+      draft.failureReason = "Every bid came in above the remaining budget. Raise the budget and try again.";
       historyStore.recordTaskHistory(draft);
       await publish({ type: "task.rejected", sessionId: task.sessionId, taskId: task.taskId, reason: draft.failureReason });
       return null;
@@ -183,7 +183,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
       await saveSession(session);
       await publish({ type: "session.paused", sessionId: task.sessionId, session });
       draft.status = "rejected";
-      draft.failureReason = "settlement would exceed the session spend cap, session paused, resume to continue";
+      draft.failureReason = "Settling this task would go over the session spend cap, so the session is paused. Resume it to continue.";
       historyStore.recordTaskHistory(draft);
       await publish({
         type: "task.rejected",

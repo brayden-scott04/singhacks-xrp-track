@@ -35,7 +35,7 @@ const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
   console.error("Invalid environment configuration:", parsed.error.flatten().fieldErrors);
-  throw new Error("Environment validation failed — check .env against .env.example");
+  throw new Error("Environment validation failed. Check .env against .env.example.");
 }
 
 export const env = parsed.data;
@@ -43,7 +43,7 @@ export const env = parsed.data;
 export function requireEnv<K extends keyof typeof env>(key: K): NonNullable<(typeof env)[K]> {
   const value = env[key];
   if (value === undefined || value === "") {
-    throw new Error(`${String(key)} is not set — see .env.example`);
+    throw new Error(`${String(key)} is not set. See .env.example.`);
   }
   return value as NonNullable<(typeof env)[K]>;
 }

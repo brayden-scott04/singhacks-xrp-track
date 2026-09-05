@@ -16,7 +16,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { initialRoundsState, roundsReducer } from "./roundsReducer";
 
 const TAGLINE =
-  "Four industry agents bid via HTTP 402. A decision agent picks the winner. XRPL settles it, and every payment carries its own justification.";
+  "Four industry agents bid on every task using HTTP 402. A decision agent picks the winner, XRPL pays them, and every payment records why it was made.";
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => null);
@@ -171,6 +171,31 @@ export function Dashboard() {
   const orderedRounds = useMemo(() => rounds.order.map((id) => rounds.byId[id]), [rounds]);
   const latestMemo = settlements[0]?.memo ?? null;
 
+  // Exactly one round is open at a time; the rest collapse to pills.
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const newestTaskId = rounds.order[0] ?? null;
+
+  // Keyed on the newest id, not on `rounds` — keying on the object would re-fire
+  // on every incoming bid and settlement event and fight the user's clicks.
+  useEffect(() => {
+    if (newestTaskId) setExpandedTaskId(newestTaskId);
+  }, [newestTaskId]);
+
+  // The settlement rail links back with #round-<taskId>. Without this, those
+  // links land on a collapsed pill and dead-end.
+  useEffect(() => {
+    function expandFromHash() {
+      const match = /^#round-(.+)$/.exec(window.location.hash);
+      if (match) setExpandedTaskId(match[1]);
+    }
+    window.addEventListener("hashchange", expandFromHash);
+    return () => window.removeEventListener("hashchange", expandFromHash);
+  }, []);
+
+  const toggleRound = useCallback((taskId: string) => {
+    setExpandedTaskId((prev) => (prev === taskId ? null : taskId));
+  }, []);
+
   return (
     <>
       <header className="app-head">
@@ -208,7 +233,14 @@ export function Dashboard() {
                 hint="Submit a task and four industry agents will bid on it in parallel."
               />
             ) : (
-              orderedRounds.map((round) => <RoundCard key={round.taskId} round={round} />)
+              orderedRounds.map((round) => (
+                <RoundCard
+                  key={round.taskId}
+                  round={round}
+                  expanded={round.taskId === expandedTaskId}
+                  onToggle={() => toggleRound(round.taskId)}
+                />
+              ))
             )}
           </section>
         </main>
