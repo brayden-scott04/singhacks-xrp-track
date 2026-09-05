@@ -6,10 +6,10 @@ import { z } from "zod";
 const optionalString = () => z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional());
 
 const envSchema = z.object({
-  OPENAI_API_KEY: optionalString(),
-  ANTHROPIC_API_KEY: optionalString(),
-  GOOGLE_API_KEY: optionalString(),
-  GEMINI_API_KEY: optionalString(),
+  // Single key for all three bidding "providers" — each is really just a
+  // different model slug called through OpenRouter's unified OpenAI-
+  // compatible endpoint (see lib/providers/llmClients.ts).
+  OPENROUTER_API_KEY: optionalString(),
 
   XRPL_SEED_AGENT: optionalString(),
   XRPL_SEED_PROVIDER_OPENAI: optionalString(),
@@ -37,14 +37,6 @@ if (!parsed.success) {
 }
 
 export const env = parsed.data;
-
-export function requireGoogleApiKey(): string {
-  const key = env.GOOGLE_API_KEY ?? env.GEMINI_API_KEY;
-  if (!key) {
-    throw new Error("GOOGLE_API_KEY (or GEMINI_API_KEY) is not set");
-  }
-  return key;
-}
 
 export function requireEnv<K extends keyof typeof env>(key: K): NonNullable<(typeof env)[K]> {
   const value = env[key];

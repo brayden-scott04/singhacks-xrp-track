@@ -41,8 +41,9 @@ cp .env.example .env
 
 Fill in `.env`:
 
-- `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `GOOGLE_API_KEY` (or
-  `GEMINI_API_KEY`) — the three bidding providers call these real APIs.
+- `OPENROUTER_API_KEY` — all three bidding providers call OpenRouter's
+  unified OpenAI-compatible endpoint with this one key. Get one at
+  https://openrouter.ai/keys
 - Leave the `XRPL_SEED_*` values blank, then generate and faucet-fund four
   testnet wallets (one agent payer, one receiver per provider):
 

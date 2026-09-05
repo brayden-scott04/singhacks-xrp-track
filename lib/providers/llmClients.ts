@@ -1,7 +1,5 @@
 import OpenAI from "openai";
-import Anthropic from "@anthropic-ai/sdk";
-import { GoogleGenAI } from "@google/genai";
-import { env, requireEnv, requireGoogleApiKey } from "../shared/env";
+import { env, requireEnv } from "../shared/env";
 
 export interface LlmCallResult {
   output: string;
@@ -9,8 +7,25 @@ export interface LlmCallResult {
   outputTokens: number;
 }
 
-export async function callOpenAI(prompt: string, modelId: string): Promise<LlmCallResult> {
-  const client = new OpenAI({ apiKey: requireEnv("OPENAI_API_KEY") });
+/**
+ * All three "providers" are really just different model slugs called through
+ * OpenRouter's unified OpenAI-compatible endpoint — one API key instead of
+ * three, using the same `openai` SDK pointed at OpenRouter's base URL.
+ * modelId here is the OpenRouter slug, e.g. "anthropic/claude-haiku-4.5".
+ */
+function openRouterClient(): OpenAI {
+  return new OpenAI({
+    apiKey: requireEnv("OPENROUTER_API_KEY"),
+    baseURL: "https://openrouter.ai/api/v1",
+    defaultHeaders: {
+      "HTTP-Referer": env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      "X-Title": "BidStream",
+    },
+  });
+}
+
+async function callViaOpenRouter(prompt: string, modelId: string): Promise<LlmCallResult> {
+  const client = openRouterClient();
   const response = await client.chat.completions.create({
     model: modelId,
     messages: [{ role: "user", content: prompt }],
@@ -22,29 +37,16 @@ export async function callOpenAI(prompt: string, modelId: string): Promise<LlmCa
   };
 }
 
+export async function callOpenAI(prompt: string, modelId: string): Promise<LlmCallResult> {
+  return callViaOpenRouter(prompt, modelId);
+}
+
 export async function callAnthropic(prompt: string, modelId: string): Promise<LlmCallResult> {
-  const client = new Anthropic({ apiKey: requireEnv("ANTHROPIC_API_KEY") });
-  const response = await client.messages.create({
-    model: modelId,
-    max_tokens: 1024,
-    messages: [{ role: "user", content: prompt }],
-  });
-  const textBlock = response.content.find((block) => block.type === "text");
-  return {
-    output: textBlock && "text" in textBlock ? textBlock.text : "",
-    inputTokens: response.usage.input_tokens,
-    outputTokens: response.usage.output_tokens,
-  };
+  return callViaOpenRouter(prompt, modelId);
 }
 
 export async function callGemini(prompt: string, modelId: string): Promise<LlmCallResult> {
-  const ai = new GoogleGenAI({ apiKey: requireGoogleApiKey() });
-  const response = await ai.models.generateContent({ model: modelId, contents: prompt });
-  return {
-    output: response.text ?? "",
-    inputTokens: response.usageMetadata?.promptTokenCount ?? 0,
-    outputTokens: response.usageMetadata?.candidatesTokenCount ?? 0,
-  };
+  return callViaOpenRouter(prompt, modelId);
 }
 
 void env; // ensures env is validated as soon as a provider route imports this module

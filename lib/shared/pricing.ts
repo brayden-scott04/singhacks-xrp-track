@@ -1,10 +1,13 @@
 import type { ProviderId } from "./types";
 
 /**
- * Published per-token list pricing, captured at build time (Sept 2026).
- * These are each provider's real, publicly listed USD/token rates for the
- * model tier this adapter uses — not fabricated numbers — but a provider's
- * live pricing page is the source of truth; verify before any production use.
+ * Published per-token list pricing, captured at build time (Sept 2026) from
+ * OpenRouter's live model catalog (https://openrouter.ai/api/v1/models) —
+ * all three model calls are routed through OpenRouter's unified endpoint
+ * (see lib/providers/llmClients.ts), so modelId below is the OpenRouter
+ * slug, not the native provider's own model name. Not fabricated numbers —
+ * but OpenRouter's live pricing page is the source of truth; verify before
+ * any production use.
  *
  * qualityScore is a static 0..1 tier signal we assign per model (cheaper/
  * faster tiers score lower, larger tiers score higher), not a live benchmark.
@@ -33,7 +36,7 @@ export interface ModelPricing {
 export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
   openai: {
     providerId: "openai",
-    modelId: "gpt-4o-mini",
+    modelId: "openai/gpt-4o-mini",
     pricePerInputTokenUsd: 0.15 / 1_000_000,
     pricePerOutputTokenUsd: 0.6 / 1_000_000,
     qualityScore: 0.62,
@@ -45,7 +48,7 @@ export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
   },
   anthropic: {
     providerId: "anthropic",
-    modelId: "claude-haiku-4-5-20251001",
+    modelId: "anthropic/claude-haiku-4.5",
     pricePerInputTokenUsd: 1.0 / 1_000_000,
     pricePerOutputTokenUsd: 5.0 / 1_000_000,
     qualityScore: 0.8,
@@ -57,7 +60,7 @@ export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
   },
   gemini: {
     providerId: "gemini",
-    modelId: "gemini-2.0-flash",
+    modelId: "google/gemini-2.5-flash-lite",
     pricePerInputTokenUsd: 0.1 / 1_000_000,
     pricePerOutputTokenUsd: 0.4 / 1_000_000,
     qualityScore: 0.58,
