@@ -128,9 +128,16 @@ function toListItem(row: StoredTaskHistory): TaskHistoryListItem {
  * scores 0 savings, correctly, since there was no alternative to shop against.
  */
 function rowSavingsUsd(row: StoredTaskHistory): number {
-  if (row.status !== "completed" || row.amountUsd === null || row.bids.length === 0) return 0;
-  const maxBidUsd = Math.max(...row.bids.map((b) => b.bid.estimatedTotalCostUsd));
-  return Math.max(0, maxBidUsd - row.amountUsd);
+  if (row.status !== "completed" || row.amountUsd === null) return 0;
+  // bids_json is persisted JSON, so its shape is only as good as the code that
+  // wrote it — rows written before a snapshot-shape change still parse. Skip
+  // any entry we can't read a cost from rather than letting one legacy row
+  // throw and take the whole stats endpoint (and the overview strip) down.
+  const bidCosts = row.bids
+    .map((b) => b.bid?.estimatedTotalCostUsd)
+    .filter((cost): cost is number => typeof cost === "number");
+  if (bidCosts.length === 0) return 0;
+  return Math.max(0, Math.max(...bidCosts) - row.amountUsd);
 }
 
 /** Pure aggregate math over already-parsed rows — kept separate from SQL so it's trivially unit-testable. */
