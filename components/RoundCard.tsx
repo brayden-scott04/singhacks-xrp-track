@@ -2,11 +2,10 @@
 
 import { fmtDrops, fmtUsdAuto, fmtUsdMicro, shortHash } from "./format";
 import { AlertIcon, CoinsIcon, LinkIcon, SpinnerIcon } from "./icons";
-import { Disclosure, Pill } from "./ui";
+import { Pill } from "./ui";
 import { BidFeed } from "./BidFeed";
 import { DecisionPanel } from "./DecisionPanel";
 import { AnswerPanel } from "./AnswerPanel";
-import { MemoView } from "./MemoView";
 import type { Round, RoundPhase } from "./roundsReducer";
 
 const PHASES: Array<{ key: RoundPhase; label: string }> = [
@@ -108,12 +107,6 @@ export function RoundCard({ round }: { round: Round }) {
             </li>
           ))}
         </ul>
-      ) : null}
-
-      {round.settlement ? (
-        <Disclosure summary="Audit memo for this settlement">
-          <MemoView memo={round.settlement.memo} settlement={round.settlement} />
-        </Disclosure>
       ) : null}
     </article>
   );

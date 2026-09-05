@@ -36,8 +36,8 @@ export function DecisionPanel({ round }: { round: Round }) {
         )}
       </div>
 
-      <blockquote className="verdict-reason">{decision.reason}</blockquote>
-
+      {/* The reason string lives only in the sidebar memo — it is the same
+          text as memo.winningReason, and showing it twice was noise. */}
       {winner?.scored ? <ContributionBar factorScores={winner.scored.factorScores} /> : null}
 
       <div className="matrix-only-wide">

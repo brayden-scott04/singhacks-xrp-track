@@ -1098,7 +1098,7 @@ kbd {
   justify-content: space-between;
   gap: var(--space-3);
   flex-wrap: wrap;
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
 .verdict-line {
@@ -1119,17 +1119,6 @@ kbd {
 .verdict-score {
   color: var(--fg-muted);
   font-size: var(--text-sm);
-}
-
-.verdict-reason {
-  margin: 0 0 var(--space-4);
-  padding: var(--space-2) 0 var(--space-2) var(--space-4);
-  border-inline-start: 3px solid var(--accent);
-  color: var(--fg);
-  font-size: var(--text-lg);
-  line-height: var(--leading-relaxed);
-  max-width: 68ch;
-  overflow-wrap: anywhere;
 }
 
 /* --- contribution bar --- */
@@ -1535,18 +1524,6 @@ kbd {
   display: flex;
   justify-content: flex-end;
   margin-bottom: var(--space-2);
-}
-
-/* A memo nested inside a round card is already in a panel. */
-.round-card .memo.panel {
-  border: none;
-  padding: 0;
-  margin: 0;
-  background: transparent;
-}
-
-.round-card .memo.panel > h2 {
-  display: none;
 }
 
 /* --- banners --- */
