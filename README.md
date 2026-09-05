@@ -53,13 +53,13 @@ Fill in `.env`:
   This appends the generated seeds directly to `.env` (never prints them) and
   reports each wallet's public address and starting XRP balance.
 
-Then run the whole stack (agent + all three provider adapters):
+Then run the app:
 
 ```bash
 npm run dev
 ```
 
-Open the dashboard at `http://localhost:4000`, submit a task, and watch the
+Open the dashboard at `http://localhost:3000`, submit a task, and watch the
 bids, the winning decision, the XRPL settlement, and the audit memo appear
 live. Or run the scripted demo in another terminal:
 
@@ -67,17 +67,35 @@ live. Or run the scripted demo in another terminal:
 npm run demo
 ```
 
+`npm run demo` targets `http://localhost:3000` by default; point it at a
+deployed URL with `DEMO_BASE_URL=https://your-deployed-app.example npm run demo`.
+
 ## Project structure
 
 ```
-src/
+app/
+  api/          Route Handlers: session CRUD, task submission (fire-and-
+                forget background processing), the /events SSE stream, and
+                one /quote + /execute pair per provider
+  page.tsx      dashboard shell
+  globals.css   dashboard styling
+lib/
   shared/       task types, env loading, pricing table, complexity scorer,
                 memo encoding, the 402 bid-protocol schemas
-  providers/    one real HTTP adapter per LLM provider (openai/anthropic/
-                gemini), all built on a shared 402-quote/execute factory
+  providers/    one real HTTP handler pair per LLM provider (openai/
+                anthropic/gemini), all built on a shared 402-quote/execute
+                factory
   agent/        orchestrator, decision engine, bid broadcaster, spend-cap
-                safeguard, XRPL wallet/channel/payment modules, SSE event bus
-  dashboard/    static vanilla-JS live view served by the agent
+                safeguard, provider URL resolution
+  store/        in-process session/quote/payment-channel state and the
+                event bus (same Maps/EventEmitter design as the original
+                Express app, now shared across Route Handlers in this one
+                Next.js process — see docs/architecture.md)
+  xrpl/         wallet loading, Payment Channel + discrete Payment
+                settlement, off-chain claim signing
+components/     React dashboard (session bar, task form, live bid feed,
+                settlement feed, audit memo view)
+hooks/          useSSE — the dashboard's live-event subscription
 scripts/        wallet setup, scripted end-to-end demo
 docs/           architecture write-up
 ```

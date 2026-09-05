@@ -3,6 +3,13 @@ dist/
 .env
 *.log
 
+# Next.js
+/.next/
+/out/
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+
 # vendored reference repos pulled by the xrpl-agentic-resources skill
 skills/xrpl-agentic-resources/ows/
 skills/xrpl-agentic-resources/rlusd-skills/

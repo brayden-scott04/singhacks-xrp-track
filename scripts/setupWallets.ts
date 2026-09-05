@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import { Client } from "xrpl";
-import { env } from "../src/shared/env.js";
+import { env } from "../lib/shared/env";
 
 const ENV_PATH = ".env";
 

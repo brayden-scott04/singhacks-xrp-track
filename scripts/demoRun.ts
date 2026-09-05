@@ -2,10 +2,10 @@
  * Scripted, repeatable demo: creates a session, submits a few tasks of
  * varying complexity, and prints the auction + settlement result for each
  * by watching the agent's SSE event stream. Requires `npm run dev` running
- * in another terminal first.
+ * in another terminal first (or point DEMO_BASE_URL at a deployed URL).
  */
 
-const AGENT_URL = `http://localhost:${process.env.PORT_AGENT ?? 4000}`;
+const BASE_URL = process.env.DEMO_BASE_URL ?? "http://localhost:3000";
 
 interface DemoTask {
   prompt: string;
@@ -20,7 +20,7 @@ const DEMO_TASKS: DemoTask[] = [
 ];
 
 async function createSession(): Promise<string> {
-  const res = await fetch(`${AGENT_URL}/session`, { method: "POST" });
+  const res = await fetch(`${BASE_URL}/api/session`, { method: "POST" });
   if (!res.ok) throw new Error(`failed to create session: ${res.status}`);
   const body = (await res.json()) as { sessionId: string };
   return body.sessionId;
@@ -34,7 +34,7 @@ function watchEventsUntil(sessionId: string, predicate: (event: any) => boolean,
       reject(new Error("timed out waiting for task to settle"));
     }, timeoutMs);
 
-    fetch(`${AGENT_URL}/events`, { signal: controller.signal })
+    fetch(`${BASE_URL}/api/events`, { signal: controller.signal })
       .then(async (res) => {
         const reader = res.body!.getReader();
         const decoder = new TextDecoder();
@@ -67,7 +67,7 @@ function watchEventsUntil(sessionId: string, predicate: (event: any) => boolean,
 async function runOne(sessionId: string, task: DemoTask, index: number) {
   console.log(`\n=== Task ${index + 1}: "${task.prompt.slice(0, 60)}..." (budget $${task.budgetUsd}) ===`);
 
-  const submitRes = await fetch(`${AGENT_URL}/session/${sessionId}/task`, {
+  const submitRes = await fetch(`${BASE_URL}/api/session/${sessionId}/task`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(task),
@@ -89,7 +89,7 @@ async function runOne(sessionId: string, task: DemoTask, index: number) {
 }
 
 async function main() {
-  console.log(`BidStream demo run against ${AGENT_URL}`);
+  console.log(`BidStream demo run against ${BASE_URL}`);
   const sessionId = await createSession();
   console.log(`session: ${sessionId}`);
 
@@ -97,7 +97,7 @@ async function main() {
     await runOne(sessionId, DEMO_TASKS[i], i);
   }
 
-  const summary = (await (await fetch(`${AGENT_URL}/session/${sessionId}`)).json()) as {
+  const summary = (await (await fetch(`${BASE_URL}/api/session/${sessionId}`)).json()) as {
     session: { spentUsd: number; capUsd: number; status: string };
     settlements: Array<{ providerId: string; mode: string; amountUsd: number; explorerUrl: string }>;
   };
