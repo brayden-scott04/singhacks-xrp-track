@@ -39,7 +39,7 @@ function LedgerVerify({ taskId, txHash }: { taskId: string; txHash: string }) {
     try {
       const res = await fetch(`/api/history/${taskId}/memo`);
       const body = await res.json();
-      if (!res.ok) throw new Error(body?.error ?? `request failed (${res.status})`);
+      if (!res.ok) throw new Error(body?.error ?? `Request failed (${res.status}).`);
       setResult(body as MemoVerifyResult);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));

@@ -1,6 +1,7 @@
 "use client";
 
 import { INDUSTRY_AGENT_IDS, type IndustryAgentId } from "@/lib/shared/types";
+import { titleCaseId } from "../format";
 import type { TaskHistoryStatus } from "@/lib/shared/historyTypes";
 
 export interface HistoryFilterState {
@@ -28,7 +29,7 @@ export function HistoryFilters({ value, onChange, onRefresh }: Props) {
         >
           {STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {titleCaseId(s)}
             </option>
           ))}
         </select>
@@ -40,10 +41,10 @@ export function HistoryFilters({ value, onChange, onRefresh }: Props) {
           value={value.industryId}
           onChange={(e) => onChange({ ...value, industryId: e.target.value as HistoryFilterState["industryId"] })}
         >
-          <option value="all">all</option>
+          <option value="all">All</option>
           {INDUSTRY_AGENT_IDS.map((id) => (
             <option key={id} value={id}>
-              {id}
+              {titleCaseId(id)}
             </option>
           ))}
         </select>
@@ -53,7 +54,7 @@ export function HistoryFilters({ value, onChange, onRefresh }: Props) {
         <span className="field-label">Search prompts</span>
         <input
           type="search"
-          placeholder="e.g. contract"
+          placeholder="e.g. Contract"
           value={value.q}
           onChange={(e) => onChange({ ...value, q: e.target.value })}
         />

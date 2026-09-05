@@ -334,6 +334,12 @@ a {
   font-variant-numeric: tabular-nums;
 }
 
+/* For lowercase id/enum values rendered as display text. Prefer titleCaseId()
+   from components/format.ts anywhere CSS cannot reach — aria, sr-only, options. */
+.capitalise {
+  text-transform: capitalize;
+}
+
 /* ==========================================================================
    Components
    ========================================================================== */

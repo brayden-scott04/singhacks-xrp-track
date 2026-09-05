@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, type FormEvent, type KeyboardEvent } from "react";
-import type { ComplexityHint } from "@/lib/shared/types";
+import { INDUSTRY_AGENT_IDS, type ComplexityHint } from "@/lib/shared/types";
 import type { SseStatus } from "@/hooks/useSSE";
 import { AlertIcon, BoltIcon, SpinnerIcon } from "./icons";
 
@@ -15,7 +15,7 @@ interface Preset {
 /** Mirrors scripts/demoRun.ts so the dashboard and the scripted demo agree. */
 const PRESETS: Preset[] = [
   {
-    label: "Summarise a changelog",
+    label: "Summarize a changelog",
     prompt: "Summarize this changelog entry in one sentence: 'Fixed a race condition in the retry queue.'",
     complexityHint: "simple",
     budgetUsd: 0.05,
@@ -96,7 +96,7 @@ export function TaskForm({
       });
       const body = await res.json().catch(() => null);
       if (!res.ok || !body?.taskId) {
-        throw new Error(body?.error ?? `failed to submit task (${res.status})`);
+        throw new Error(body?.error ?? `Failed to submit the task (${res.status}).`);
       }
       onSubmitted({ taskId: body.taskId, prompt: trimmed, complexityHint: complexity, budgetUsd });
       setPrompt("");
@@ -142,7 +142,8 @@ export function TaskForm({
           aria-describedby="prompt-hint"
         />
         <p id="prompt-hint" className="field-hint">
-          All four industry agents bid on every task. <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>Enter</kbd> to submit.
+          All {INDUSTRY_AGENT_IDS.length} industry agents bid on every task. <kbd>⌘</kbd>/<kbd>Ctrl</kbd> +{" "}
+          <kbd>Enter</kbd> to submit.
         </p>
 
         <div className="form-row">

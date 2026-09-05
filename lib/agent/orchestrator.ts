@@ -82,8 +82,8 @@ function snapshotRankedBids(decision: DecisionResult): HistoryBidSnapshot[] {
 export async function runTask(task: Task): Promise<TaskResult | null> {
   const session = await getSession(task.sessionId);
   if (!session) {
-    await publish({ type: "task.failed", sessionId: task.sessionId, taskId: task.taskId, reason: "unknown session" });
-    historyStore.recordTaskHistory(baseHistoryDraft(task, "failed", "unknown session"));
+    await publish({ type: "task.failed", sessionId: task.sessionId, taskId: task.taskId, reason: "Unknown session." });
+    historyStore.recordTaskHistory(baseHistoryDraft(task, "failed", "Unknown session."));
     return null;
   }
 
@@ -122,7 +122,7 @@ export async function runTask(task: Task): Promise<TaskResult | null> {
 
     if (bids.length === 0) {
       draft.status = "failed";
-      draft.failureReason = "no provider responded to the bid round";
+      draft.failureReason = "No agent responded to the bid round.";
       historyStore.recordTaskHistory(draft);
       await publish({ type: "task.failed", sessionId: task.sessionId, taskId: task.taskId, reason: draft.failureReason });
       return null;

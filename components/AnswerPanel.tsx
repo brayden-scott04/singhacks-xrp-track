@@ -49,14 +49,19 @@ export function AnswerPanel({ round }: { round: Round }) {
         <span className="answer-head-main">
           {winner ? <IndustryIcon industryId={winner.industryId} size={16} /> : null}
           <span>
-            Answer delivered by <strong className="answer-agent">{winner?.industryId ?? "the winning agent"}</strong>
+            Answer delivered by{" "}
+            {winner ? (
+              <strong className="answer-agent">{winner.industryId}</strong>
+            ) : (
+              <strong>the winning agent</strong>
+            )}
             {winner?.bid ? <span className="mono dim"> {winner.bid.modelId}</span> : null}
           </span>
         </span>
         <span className="answer-head-meta">
           {settlement ? <span className="mono">paid {fmtUsdMicro(settlement.amountUsd)}</span> : null}
           {settlement ? (
-            <a href={settlement.explorerUrl} target="_blank" rel="noopener noreferrer" aria-label="View settlement on the XRPL testnet explorer">
+            <a href={settlement.explorerUrl} target="_blank" rel="noopener noreferrer" aria-label={`View transaction ${settlement.txHash} on the XRPL testnet explorer`}>
               <LinkIcon size={12} />
               <span className="mono">{shortHash(settlement.txHash, 6, 4)}</span>
             </a>

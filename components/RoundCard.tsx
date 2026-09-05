@@ -15,6 +15,16 @@ const PHASES: Array<{ key: RoundPhase; label: string }> = [
   { key: "settled", label: "Settled" },
 ];
 
+const PHASE_LABEL: Record<RoundPhase, string> = {
+  bidding: "Bidding",
+  deciding: "Deciding",
+  executing: "Deciding",
+  settling: "Settling",
+  settled: "Settled",
+  rejected: "Rejected",
+  failed: "Failed",
+};
+
 const PHASE_INDEX: Record<RoundPhase, number> = {
   bidding: 0,
   deciding: 0,
@@ -30,13 +40,13 @@ function PhaseStepper({ phase }: { phase: RoundPhase }) {
   const terminal = phase === "failed" || phase === "rejected";
 
   return (
-    <ol className="stepper" role="list" aria-label={`Round progress: ${phase}`}>
+    <ol className="stepper" role="list" aria-label={`Round progress: ${PHASE_LABEL[phase]}`}>
       {PHASES.map((step, i) => {
         const state = i < current ? "done" : i === current ? (terminal ? "failed" : "active") : "todo";
         return (
           <li key={step.key} className="stepper-step" data-state={state}>
             <span className="stepper-dot" aria-hidden="true" />
-            <span className="stepper-label">{terminal && i === current ? phase : step.label}</span>
+            <span className="stepper-label">{terminal && i === current ? PHASE_LABEL[phase] : step.label}</span>
           </li>
         );
       })}
@@ -98,7 +108,7 @@ function RoundPill({ round, onExpand }: { round: Round; onExpand: () => void }) 
       {failed ? (
         <span className="round-pill-status">
           <AlertIcon size={14} />
-          {round.phase}
+          {PHASE_LABEL[round.phase]}
         </span>
       ) : winner ? (
         <span className="round-pill-winner">
@@ -108,7 +118,7 @@ function RoundPill({ round, onExpand }: { round: Round; onExpand: () => void }) 
       ) : (
         <span className="round-pill-winner dim">
           <SpinnerIcon size={14} />
-          bidding
+          Bidding
         </span>
       )}
 
@@ -154,7 +164,7 @@ export function RoundCard({
             <p className="round-prompt">{round.prompt || PROMPT_FALLBACK}</p>
             <p className="round-meta">
               {round.budgetUsd !== null ? <span>budget {fmtUsdAuto(round.budgetUsd)}</span> : null}
-              {round.complexityHint ? <span>{round.complexityHint}</span> : null}
+              {round.complexityHint ? <span className="capitalise">{round.complexityHint}</span> : null}
               {busy ? (
                 <span className="round-busy">
                   <SpinnerIcon size={12} /> running

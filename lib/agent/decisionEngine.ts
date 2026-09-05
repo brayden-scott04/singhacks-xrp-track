@@ -39,7 +39,7 @@ export async function decide(
   ranked.sort((a, b) => b.score - a.score || a.bid.estimatedTotalCostUsd - b.bid.estimatedTotalCostUsd);
 
   if (eligible.length === 0) {
-    return { winner: scored[0], score: 0, reason: "all bids exceeded remaining budget", ranked, rejectedForBudget };
+    return { winner: scored[0], score: 0, reason: "All bids exceeded the remaining budget.", ranked, rejectedForBudget };
   }
 
   const deterministicWinner = [...eligible].sort(

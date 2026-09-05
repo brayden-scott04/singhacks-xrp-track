@@ -118,6 +118,15 @@ export function fmtRelative(fromMs: number, nowMs: number): string {
   return `${Math.floor(delta / 3_600_000)}h ago`;
 }
 
+/**
+ * Industry and status ids are lowercase literals. CSS `text-transform:
+ * capitalize` handles the pure display sites, but it cannot reach aria-label,
+ * sr-only announcements, or <option> labels — use this there.
+ */
+export function titleCaseId(id: string): string {
+  return id.charAt(0).toUpperCase() + id.slice(1);
+}
+
 const WORD_RE = /\S+/g;
 
 export function countWords(text: string): number {

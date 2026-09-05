@@ -11,7 +11,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id: sessionId } = await params;
   const session = await getSession(sessionId);
   if (!session) {
-    return NextResponse.json({ error: "unknown session" }, { status: 404 });
+    return NextResponse.json({ error: "Unknown session." }, { status: 404 });
   }
 
   const body = await req.json().catch(() => ({}) as Record<string, unknown>);
@@ -23,7 +23,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     typeof body?.budgetUsd === "number" && body.budgetUsd > 0 ? body.budgetUsd : session.capUsd - session.spentUsd;
 
   if (!prompt) {
-    return NextResponse.json({ error: "prompt is required" }, { status: 400 });
+    return NextResponse.json({ error: "A prompt is required." }, { status: 400 });
   }
 
   const taskId = randomUUID();

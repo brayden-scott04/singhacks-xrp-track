@@ -47,7 +47,7 @@ export function HistoryTable({
   if (rows.length === 0) {
     return (
       <section className="panel">
-        <h2>Task history</h2>
+        <h2>Tasks</h2>
         <EmptyState title="No tasks match these filters" hint="Every task the agent runs is recorded here, including the ones that failed." />
       </section>
     );
@@ -59,7 +59,7 @@ export function HistoryTable({
 
   return (
     <section className="panel">
-      <h2>Task history</h2>
+      <h2>Tasks</h2>
 
       <div className="history-table-wrap">
         <table className="history-table">
@@ -112,7 +112,7 @@ export function HistoryTable({
                         {row.winnerIndustryId}
                       </span>
                     ) : (
-                      <span className="dim">none</span>
+                      <span className="dim">None</span>
                     )}
                   </td>
                   <td className="mono nowrap">{cost === null ? <span className="dim">—</span> : fmtUsdMicro(cost)}</td>
@@ -134,7 +134,7 @@ export function HistoryTable({
                         <span className="mono">{shortHash(row.txHash, 6, 4)}</span>
                       </a>
                     ) : (
-                      <span className="dim">not settled</span>
+                      <span className="dim">Not settled</span>
                     )}
                   </td>
                 </tr>
