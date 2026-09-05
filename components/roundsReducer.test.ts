@@ -78,7 +78,7 @@ describe("roundsReducer", () => {
   it("seeds every industry agent as pending so the auction fills in live", () => {
     const state = run([submitted]);
     const round = state.byId.t1;
-    expect(round.bids).toHaveLength(4);
+    expect(round.bids).toHaveLength(5);
     expect(round.bids.every((b) => b.outcome === "pending")).toBe(true);
     expect(round.phase).toBe("bidding");
   });

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { detectOutputFile } from "@/lib/shared/outputFile";
 import { countWords, fmtDuration, fmtUsdMicro, shortHash } from "./format";
 import { IndustryIcon, LinkIcon, SpinnerIcon } from "./icons";
-import { CopyButton, Skeleton } from "./ui";
+import { CopyButton, DownloadButton, Skeleton } from "./ui";
 import { selectWinner, type Round } from "./roundsReducer";
 
 /**
@@ -15,6 +16,10 @@ export function AnswerPanel({ round }: { round: Round }) {
   const [expanded, setExpanded] = useState(false);
   const winner = selectWinner(round);
   const settlement = round.settlement;
+  const file = useMemo(
+    () => (round.output ? detectOutputFile(round.prompt, round.output) : null),
+    [round.prompt, round.output],
+  );
 
   const waiting = round.phase === "executing" || round.phase === "settling";
 
@@ -62,6 +67,7 @@ export function AnswerPanel({ round }: { round: Round }) {
             </a>
           ) : null}
           <CopyButton value={round.output} label="Copy answer" />
+          {file ? <DownloadButton filename={file.filename} content={file.content} label={`Download ${file.filename}`} /> : null}
         </span>
       </div>
 

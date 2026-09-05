@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
-import { CheckIcon, ChevronIcon, CopyIcon, type IconProps } from "./icons";
+import { CheckIcon, ChevronIcon, CopyIcon, DownloadIcon, type IconProps } from "./icons";
 import { fmtScore } from "./format";
 
 /* ---------------------------------------------------------------- Pill --- */
@@ -89,6 +89,30 @@ export function CopyButton({ value, label = "Copy" }: { value: string; label?: s
       <span className="sr-only" role="status">
         {copied ? "Copied to clipboard" : ""}
       </span>
+    </button>
+  );
+}
+
+/* ------------------------------------------------------ DownloadButton --- */
+
+/**
+ * Saves the given content as a local file via a throwaway object URL —
+ * only rendered by callers that already determined the content is
+ * file-shaped (see lib/shared/outputFile.ts), not for every answer.
+ */
+export function DownloadButton({ filename, content, label }: { filename: string; content: string; label?: string }) {
+  const download = useCallback(() => {
+    const url = URL.createObjectURL(new Blob([content], { type: "text/plain;charset=utf-8" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [content, filename]);
+
+  return (
+    <button type="button" className="btn-icon" onClick={download} aria-label={label ?? `Download ${filename}`} title={label ?? `Download ${filename}`}>
+      <DownloadIcon size={14} />
     </button>
   );
 }

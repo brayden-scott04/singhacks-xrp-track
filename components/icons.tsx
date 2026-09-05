@@ -92,6 +92,13 @@ export const ChevronIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const DownloadIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 3v12m0 0-4-4m4 4 4-4" />
+    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+  </Svg>
+);
+
 export const SpinnerIcon = ({ size = 16, ...rest }: IconProps) => (
   <Svg size={size} className="spinner" {...rest}>
     <path d="M21 12a9 9 0 1 1-6.2-8.6" />
@@ -162,11 +169,19 @@ export const CpuIcon = (p: IconProps) => (
   </Svg>
 );
 
+export const GlobeIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+  </Svg>
+);
+
 const INDUSTRY_ICONS: Record<IndustryAgentId, (p: IconProps) => React.JSX.Element> = {
   legal: ScaleIcon,
   healthcare: HeartPulseIcon,
   finance: TrendingUpIcon,
   technology: CpuIcon,
+  general: GlobeIcon,
 };
 
 export function IndustryIcon({ industryId, ...rest }: IconProps & { industryId: IndustryAgentId }) {
