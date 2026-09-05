@@ -3,11 +3,11 @@
 Every task you submit is auctioned live among five AI agents. Each one bids
 with a real **HTTP 402 Payment Required** response, a decision agent picks the
 winner, the task runs on that winner, and payment settles on the XRP Ledger
-carrying a Memo that records *why* it won.
+carrying a Memo that records _why_ it won.
 
 Built for the Ripple / SingHacks "AI-Native Business on XRPL" track. Testnet only.
 
-![The BidStream dashboard: a task submission form with complexity and budget controls on the left, and the live audit memo and XRPL settlement panels on the right.](docs/dashboard.png)
+![The BidStream dashboard: a task submission form with complexity and budget controls on the left, and the live audit memo and XRPL settlement panels on the right.](docs/dashboard.jpg)
 
 ## Why
 
@@ -25,7 +25,7 @@ round in the background, reporting only over SSE.
 1. **Broadcast.** The orchestrator calls all five agents' `/quote` routes over
    real HTTP. Each returns **402** carrying its price per input/output token,
    quality, knowledge, speed, load, and context-window signals for that
-   specific task. The 402 *is* the bid; any other status is a failed bid.
+   specific task. The 402 _is_ the bid; any other status is a failed bid.
    Quotes are binding and TTL'd 30s.
 2. **Decide.** Seven factors are normalised to 0-1 against the round (higher
    always better) and blended on fixed weights into a composite prior. The
@@ -56,13 +56,13 @@ regardless of subject, and the providers never see the industry framing. Only
 the decision agent, reading the task text next to the labels, makes routing
 domain-aware.
 
-| Agent | Provider | Model | Context |
-|---|---|---|---|
-| Legal | Anthropic | `anthropic/claude-haiku-4.5` | 200K |
-| Healthcare | OpenAI | `openai/gpt-4o-mini` | 128K |
-| Finance | Google | `google/gemini-2.5-flash-lite` | 1M |
-| Technology | DeepSeek | `deepseek/deepseek-chat` | 164K |
-| General | Meta | `meta-llama/llama-3.3-70b-instruct` | 128K |
+| Agent      | Provider  | Model                               | Context |
+| ---------- | --------- | ----------------------------------- | ------- |
+| Legal      | Anthropic | `anthropic/claude-haiku-4.5`        | 200K    |
+| Healthcare | OpenAI    | `openai/gpt-4o-mini`                | 128K    |
+| Finance    | Google    | `google/gemini-2.5-flash-lite`      | 1M      |
+| Technology | DeepSeek  | `deepseek/deepseek-chat`            | 164K    |
+| General    | Meta      | `meta-llama/llama-3.3-70b-instruct` | 128K    |
 
 Decision weights: quality 0.25, error rate 0.20, price 0.20, knowledge 0.15,
 context window 0.10, speed 0.06, load 0.04. Error rate is a live rolling rate
@@ -105,17 +105,17 @@ node node_modules/esbuild/install.js
 
 ## Configuration
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `OPENROUTER_API_KEY` | none | One key for all five bidders and the decision agent ([get one](https://openrouter.ai/keys)) |
-| `XRPL_SEED_AGENT` | none | Payer wallet; `setup:wallets` fills it |
-| `XRPL_SEED_PROVIDER_*` | none | One receiver per provider (openai, anthropic, gemini, deepseek, meta) |
-| `XRPL_NETWORK` | testnet altnet | XRPL websocket endpoint |
-| `SETTLEMENT_MODE` | `channel` | `channel` (with automatic `payment` fallback) or forced `payment` |
-| `XRP_USD_RATE` | `0.50` | Fixed illustrative rate, not a live oracle |
-| `SESSION_SPEND_CAP_USD` | `2.00` | Per-session cap; warns at 90%, then pauses |
-| `PROVIDER_QUOTE_TIMEOUT_MS` | `8000` | A bidder slower than this is excluded from the round |
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | Base URL the orchestrator uses to reach the provider routes over real HTTP |
+| Variable                    | Default                 | Purpose                                                                                     |
+| --------------------------- | ----------------------- | ------------------------------------------------------------------------------------------- |
+| `OPENROUTER_API_KEY`        | none                    | One key for all five bidders and the decision agent ([get one](https://openrouter.ai/keys)) |
+| `XRPL_SEED_AGENT`           | none                    | Payer wallet; `setup:wallets` fills it                                                      |
+| `XRPL_SEED_PROVIDER_*`      | none                    | One receiver per provider (openai, anthropic, gemini, deepseek, meta)                       |
+| `XRPL_NETWORK`              | testnet altnet          | XRPL websocket endpoint                                                                     |
+| `SETTLEMENT_MODE`           | `channel`               | `channel` (with automatic `payment` fallback) or forced `payment`                           |
+| `XRP_USD_RATE`              | `0.50`                  | Fixed illustrative rate, not a live oracle                                                  |
+| `SESSION_SPEND_CAP_USD`     | `2.00`                  | Per-session cap; warns at 90%, then pauses                                                  |
+| `PROVIDER_QUOTE_TIMEOUT_MS` | `8000`                  | A bidder slower than this is excluded from the round                                        |
+| `NEXT_PUBLIC_APP_URL`       | `http://localhost:3000` | Base URL the orchestrator uses to reach the provider routes over real HTTP                  |
 
 Env is validated with zod at import, so a bad value fails fast rather than at
 settlement time.
@@ -171,7 +171,7 @@ docs/architecture.md   full write-up
 - **Any restart resets that state**, open payment channels included. An HMR
   reload opens a fresh channel, so don't edit files mid-demo. Task history is
   the exception: it persists to `data/history.db`.
-- Settlement uses the *quoted* cost, not actual token usage, so the on-chain
+- Settlement uses the _quoted_ cost, not actual token usage, so the on-chain
   record always matches the auction decision it justifies.
 - Every transaction carries `SourceTag 20260530`, is autofilled before signing
   and submitted with `submitAndWait`.
@@ -192,12 +192,12 @@ npm run demo
 From a real `npm run demo` run plus a forced-fallback run, not a mocked
 settlement test. Each has a decoded, matching audit memo.
 
-| What | Type | Transaction |
-|---|---|---|
-| Channel open (to `deepseek`) | `PaymentChannelCreate` | [`6FDF5464...79BE30`](https://testnet.xrpl.org/transactions/6FDF54641BE7C71EF6EF73FEBB2BF18667847995701F561BBB7498342F79BE30) |
-| Task 1 settlement | `PaymentChannelClaim` | [`92C72CEA...D5E85B5`](https://testnet.xrpl.org/transactions/92C72CEA0680E4CFE74BC2DBC6BFE1CDA7150334135F5C6AFC2B5E494D5E85B5) |
-| Task 2, cumulative claim on the same channel | `PaymentChannelClaim` | [`EB0F8B3F...CF0A3A`](https://testnet.xrpl.org/transactions/EB0F8B3F7FF00E1A3D64F8F8F70ED2C949E63446115C7D862E46FB4FDDCF0A3A) |
-| Forced fallback (`SETTLEMENT_MODE=payment`) | `Payment` | [`BEBEAFAE...C11E6BC`](https://testnet.xrpl.org/transactions/BEBEAFAEA1BD182338FFA788A1A35B9FE610AA634B90A1E7FA084D316C11E6BC) |
+| What                                         | Type                   | Transaction                                                                                                                    |
+| -------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Channel open (to `deepseek`)                 | `PaymentChannelCreate` | [`6FDF5464...79BE30`](https://testnet.xrpl.org/transactions/6FDF54641BE7C71EF6EF73FEBB2BF18667847995701F561BBB7498342F79BE30)  |
+| Task 1 settlement                            | `PaymentChannelClaim`  | [`92C72CEA...D5E85B5`](https://testnet.xrpl.org/transactions/92C72CEA0680E4CFE74BC2DBC6BFE1CDA7150334135F5C6AFC2B5E494D5E85B5) |
+| Task 2, cumulative claim on the same channel | `PaymentChannelClaim`  | [`EB0F8B3F...CF0A3A`](https://testnet.xrpl.org/transactions/EB0F8B3F7FF00E1A3D64F8F8F70ED2C949E63446115C7D862E46FB4FDDCF0A3A)  |
+| Forced fallback (`SETTLEMENT_MODE=payment`)  | `Payment`              | [`BEBEAFAE...C11E6BC`](https://testnet.xrpl.org/transactions/BEBEAFAEA1BD182338FFA788A1A35B9FE610AA634B90A1E7FA084D316C11E6BC) |
 
 ## More
 
