@@ -1,5 +1,6 @@
 import { EventEmitter } from "node:events";
 import type { DecisionResult, ExcludedBid, IndustryAgentId, IndustryBid, ProviderId, SessionState, SettlementRecord } from "../shared/types";
+import { globalSingleton } from "./globalSingleton";
 
 export type BidStreamEvent =
   | { type: "bid.received"; sessionId: string; taskId: string; bid: IndustryBid }
@@ -15,8 +16,11 @@ export type BidStreamEvent =
   | { type: "task.rejected"; sessionId: string; taskId: string; reason: string }
   | { type: "task.failed"; sessionId: string; taskId: string; reason: string };
 
-const emitter = new EventEmitter();
-emitter.setMaxListeners(50);
+const emitter = globalSingleton("eventEmitter", () => {
+  const e = new EventEmitter();
+  e.setMaxListeners(50);
+  return e;
+});
 
 export function publish(event: BidStreamEvent): void {
   emitter.emit("event", event);

@@ -1,4 +1,5 @@
 import type { ProviderId } from "../shared/types";
+import { globalSingleton } from "./globalSingleton";
 
 export interface ChannelState {
   channelId: string;
@@ -6,9 +7,9 @@ export interface ChannelState {
 }
 
 // One active session at a time for this hackathon build — see docs/architecture.md.
-const channels = new Map<ProviderId, ChannelState>();
+const channels = globalSingleton("channels", () => new Map<ProviderId, ChannelState>());
 
-const lockTail = new Map<ProviderId, Promise<void>>();
+const lockTail = globalSingleton("channelLockTail", () => new Map<ProviderId, Promise<void>>());
 
 /**
  * Serializes channel-open + settlement per provider within this process.

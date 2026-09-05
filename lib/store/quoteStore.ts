@@ -1,5 +1,6 @@
 import { QUOTE_TTL_MS, type QuoteResponse } from "../shared/bidProtocol";
 import type { ProviderId } from "../shared/types";
+import { globalSingleton } from "./globalSingleton";
 
 interface StoredQuote {
   quote: QuoteResponse;
@@ -15,7 +16,7 @@ interface StoredQuote {
  * free (a quoteId collision across providers can't leak into another
  * provider's execute path).
  */
-const quotes = new Map<string, StoredQuote>();
+const quotes = globalSingleton("quotes", () => new Map<string, StoredQuote>());
 
 function quoteKey(providerId: ProviderId, quoteId: string): string {
   return `${providerId}:${quoteId}`;

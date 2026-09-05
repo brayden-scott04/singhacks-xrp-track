@@ -110,16 +110,14 @@ decoded, matching audit memo:
 
 | Transaction | Type | Hash |
 |---|---|---|
-| Channel open | `PaymentChannelCreate` | [`41F1261510C4540E9C8BBA8A8705C14A9D72154070C590999BD5848E6445A829`](https://testnet.xrpl.org/transactions/41F1261510C4540E9C8BBA8A8705C14A9D72154070C590999BD5848E6445A829) |
-| Task 1 settlement | `PaymentChannelClaim` | [`F9C0EE9745214A0307213F88CF89209A522CDCF0F1F01B3B6EB648CD5B232AE5`](https://testnet.xrpl.org/transactions/F9C0EE9745214A0307213F88CF89209A522CDCF0F1F01B3B6EB648CD5B232AE5) |
-| Task 2 settlement (cumulative claim, same channel) | `PaymentChannelClaim` | [`7B229A9AFBD2E2FA954F49380492D47106F3564E0D04BDD85F4DF1A2E2239E47`](https://testnet.xrpl.org/transactions/7B229A9AFBD2E2FA954F49380492D47106F3564E0D04BDD85F4DF1A2E2239E47) |
-| Fallback settlement | `Payment` | [`62778130F69F985B0FE4016732C47C6D91300EDB8C8A6F72DE0516C53E81B37E`](https://testnet.xrpl.org/transactions/62778130F69F985B0FE4016732C47C6D91300EDB8C8A6F72DE0516C53E81B37E) |
+| Channel open (to `deepseek`) | `PaymentChannelCreate` | [`6FDF54641BE7C71EF6EF73FEBB2BF18667847995701F561BBB7498342F79BE30`](https://testnet.xrpl.org/transactions/6FDF54641BE7C71EF6EF73FEBB2BF18667847995701F561BBB7498342F79BE30) |
+| Task 1 settlement | `PaymentChannelClaim` | [`92C72CEA0680E4CFE74BC2DBC6BFE1CDA7150334135F5C6AFC2B5E494D5E85B5`](https://testnet.xrpl.org/transactions/92C72CEA0680E4CFE74BC2DBC6BFE1CDA7150334135F5C6AFC2B5E494D5E85B5) |
+| Task 2 settlement (cumulative claim, same channel) | `PaymentChannelClaim` | [`EB0F8B3F7FF00E1A3D64F8F8F70ED2C949E63446115C7D862E46FB4FDDCF0A3A`](https://testnet.xrpl.org/transactions/EB0F8B3F7FF00E1A3D64F8F8F70ED2C949E63446115C7D862E46FB4FDDCF0A3A) |
+| Fallback settlement (forced via `SETTLEMENT_MODE=payment`) | `Payment` | [`BEBEAFAEA1BD182338FFA788A1A35B9FE610AA634B90A1E7FA084D316C11E6BC`](https://testnet.xrpl.org/transactions/BEBEAFAEA1BD182338FFA788A1A35B9FE610AA634B90A1E7FA084D316C11E6BC) |
 
-These four were produced directly against the settlement modules while
-provider LLM API keys weren't yet available in this environment. Once real
-API keys are in `.env`, `npm run demo` or the dashboard produces fresh,
-task-linked hashes for a full live run — replace the table above with those
-for the final submission.
+These were produced by `npm run demo` and a follow-up forced-fallback run
+against this build with real provider API keys and freshly funded testnet
+wallets — a full live run, not a mocked or standalone settlement-module test.
 
 ## Agentic payment flow (x402-as-bidding)
 

@@ -86,7 +86,7 @@ async function runOne(sessionId: string, task: DemoTask, index: number) {
   const terminal = await watchEventsUntil(
     sessionId,
     (e) => e.taskId === taskId && ["task.completed", "task.rejected", "task.failed"].includes(e.type),
-    30_000,
+    60_000,
     (e) => {
       if (e.taskId === taskId && e.type === "decision.made") {
         console.log("-- Industry agent scoring --");

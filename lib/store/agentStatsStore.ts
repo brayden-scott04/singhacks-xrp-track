@@ -1,4 +1,5 @@
 import type { IndustryAgentId } from "../shared/types";
+import { globalSingleton } from "./globalSingleton";
 
 interface Stats {
   successes: number;
@@ -9,7 +10,7 @@ interface Stats {
 const DEFAULT_ERROR_RATE_PCT = 2;
 const MIN_SAMPLES_BEFORE_TRUSTING = 5;
 
-const stats = new Map<IndustryAgentId, Stats>();
+const stats = globalSingleton("agentStats", () => new Map<IndustryAgentId, Stats>());
 
 export function recordOutcome(industryId: IndustryAgentId, success: boolean): void {
   const current = stats.get(industryId) ?? { successes: 0, failures: 0 };

@@ -1,12 +1,13 @@
 import { randomUUID } from "node:crypto";
 import type { SessionState, SettlementRecord } from "../shared/types";
+import { globalSingleton } from "./globalSingleton";
 
 interface SessionRecord {
   state: SessionState;
   settlements: SettlementRecord[];
 }
 
-const sessions = new Map<string, SessionRecord>();
+const sessions = globalSingleton("sessions", () => new Map<string, SessionRecord>());
 
 export function createSession(capUsd: number): SessionState {
   const sessionId = randomUUID();
