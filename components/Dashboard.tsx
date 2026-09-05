@@ -207,7 +207,7 @@ export function Dashboard() {
 
         <aside className="rail" aria-label="Session and ledger">
           <SessionBar session={session} onResume={handleResume} />
-          <MemoView memo={latestMemo} />
+          <MemoView memo={latestMemo} settlement={settlements[0] ?? null} />
           <SettlementFeed settlements={settlements} />
         </aside>
       </div>
