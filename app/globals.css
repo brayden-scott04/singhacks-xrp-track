@@ -1,8 +1,11 @@
 /* ==========================================================================
    BidStream design tokens
    Structure: scales -> semantic colour (dark) -> semantic colour (light)
-              -> legacy aliases -> reset -> base -> layout -> a11y
-              -> components -> responsive -> motion
+              -> reset -> base -> a11y -> components -> responsive -> motion
+
+   Every colour below the token blocks is a var(). Contrast is verified
+   against WCAG AA in both themes: 4.5:1 for text, 3:1 for control
+   boundaries and meter fills.
    ========================================================================== */
 
 :root {
@@ -131,7 +134,7 @@
     --fg-subtle: #64748b;
 
     --border: #cbd5e1;
-    --border-strong: #94a3b8;
+    --border-strong: #7c8899;
 
     --accent: #15803d;
     --accent-solid: #15803d;
@@ -180,7 +183,7 @@
   --fg-subtle: #64748b;
 
   --border: #cbd5e1;
-  --border-strong: #94a3b8;
+  --border-strong: #7c8899;
 
   --accent: #15803d;
   --accent-solid: #15803d;
@@ -212,14 +215,6 @@
   --shadow-sm: 0 1px 2px rgb(15 23 42 / 0.06);
   --shadow-md: 0 4px 12px rgb(15 23 42 / 0.08);
   --shadow-lg: 0 12px 32px rgb(15 23 42 / 0.1);
-}
-
-/* --- legacy aliases (removed in the final commit of the redesign) --- */
-:root {
-  --panel: var(--surface);
-  --text: var(--fg);
-  --muted: var(--fg-muted);
-  --winner: var(--winner-bg);
 }
 
 /* ==========================================================================
@@ -493,63 +488,6 @@ button:disabled {
   gap: var(--space-2);
   max-height: 320px;
   overflow-y: auto;
-}
-
-.empty {
-  color: var(--fg-muted);
-  font-size: var(--text-sm);
-}
-
-.bid-round {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-}
-
-.bid-round-title {
-  font-size: var(--text-xs);
-  color: var(--fg-muted);
-  margin-bottom: var(--space-2);
-}
-
-.bid-row {
-  display: flex;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-sm);
-  overflow-wrap: anywhere;
-}
-
-.bid-row.winner {
-  background: var(--winner-bg);
-  color: var(--winner-fg);
-  font-weight: var(--weight-semibold);
-}
-
-.bid-row.excluded {
-  color: var(--danger);
-  font-style: italic;
-}
-
-.bid-row.rejected {
-  color: var(--warn);
-}
-
-.payment-row {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
-  font-size: var(--text-sm);
-  overflow-wrap: anywhere;
-}
-
-.payment-row a {
-  color: var(--link);
-}
-
-.payment-row.fallback {
-  border-color: var(--warn-border);
 }
 
 pre#memo-view {
