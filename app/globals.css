@@ -8,6 +8,7 @@
   --warn: #f0b429;
   --danger: #f0576a;
   --winner: #1f5f4a;
+  --input-bg: #0f151b;
   font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -74,7 +75,7 @@ h2 { margin: 0 0 12px; font-size: 1rem; color: var(--muted); text-transform: upp
 textarea {
   width: 100%;
   min-height: 80px;
-  background: #0f151b;
+  background: var(--input-bg);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -86,7 +87,7 @@ textarea {
 .form-row { display: flex; align-items: end; gap: 16px; margin-top: 10px; flex-wrap: wrap; }
 .form-row label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); }
 select, input {
-  background: #0f151b;
+  background: var(--input-bg);
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -109,33 +110,84 @@ button:hover { filter: brightness(1.1); }
 
 .bid-round { border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
 .bid-round-title { font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; }
-.bid-row {
+
+/* Bid table */
+.bid-table { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; overflow-x: auto; }
+.bid-table-header,
+.bid-table-row {
+  display: grid;
+  grid-template-columns: 1.1fr 1.6fr 0.9fr 0.6fr 0.7fr 0.6fr 0.6fr 0.7fr 0.8fr;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 6px;
+  min-width: 640px;
+}
+.bid-table-header { font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; }
+.bid-table-row { font-size: 0.85rem; }
+.bid-table-row:nth-child(even) { background: rgba(127, 127, 127, 0.06); }
+.bid-table-row.winner { background: var(--winner); font-weight: 600; }
+.bid-table-row.rejected { opacity: 0.55; }
+.bid-table-row.excluded {
+  grid-template-columns: 1fr;
+  opacity: 0.6;
+  font-style: italic;
+  color: var(--danger);
+  min-width: 0;
+}
+.bid-industry { display: flex; align-items: center; gap: 6px; }
+.num { font-variant-numeric: tabular-nums; text-align: right; }
+.bid-table-header .num { text-align: right; }
+
+.winner-badge { background: var(--winner); color: var(--text); }
+.rejected-badge { background: #4a3a15; color: var(--warn); }
+
+/* Settlement cards */
+.settlement-card {
   display: flex;
   justify-content: space-between;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-}
-.bid-row.winner { background: var(--winner); font-weight: 600; }
-.bid-row.excluded { color: var(--danger); font-style: italic; }
-.bid-row.rejected { color: var(--warn); }
-
-.payment-row {
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 10px 12px;
   font-size: 0.9rem;
 }
-.payment-row a { color: var(--accent); }
-.payment-row.fallback { border-color: var(--warn); }
+.settlement-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.settlement-industry { font-weight: 600; text-transform: capitalize; }
+.settlement-provider { color: var(--muted); }
+.settlement-meta { display: flex; align-items: center; gap: 12px; }
+.settlement-amount { font-weight: 600; }
+.settlement-link { color: var(--accent); font-size: 0.85rem; }
+.mode-badge.channel { background: #16394a; color: var(--accent); }
+.mode-badge.payment { background: #234; color: var(--muted); }
+.fallback-badge { background: #4a3a15; color: var(--warn); }
 
-pre#memo-view {
-  background: #0f151b;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  overflow-x: auto;
-  font-size: 0.85rem;
+/* Memo view */
+.memo-grid {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  row-gap: 6px;
+  column-gap: 16px;
+  font-size: 0.88rem;
+  margin: 0 0 16px;
+}
+.memo-grid dt { color: var(--muted); }
+.memo-grid dd { margin: 0; font-variant-numeric: tabular-nums; }
+.memo-factors { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.factor-row { display: grid; grid-template-columns: 110px 1fr 40px; align-items: center; gap: 8px; font-size: 0.8rem; }
+.factor-label { color: var(--muted); }
+.factor-bar { height: 6px; border-radius: 999px; background: #1c2733; overflow: hidden; }
+.factor-fill { height: 100%; background: var(--accent); }
+.factor-value { text-align: right; font-variant-numeric: tabular-nums; }
+.memo-reason {
+  color: var(--text);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
 }
 
 @media (prefers-color-scheme: light) {
@@ -146,6 +198,7 @@ pre#memo-view {
     --text: #10161c;
     --muted: #5c6b7a;
     --winner: #d3f2e6;
+    --input-bg: #eef2f6;
   }
   button { color: #06201c; }
 }

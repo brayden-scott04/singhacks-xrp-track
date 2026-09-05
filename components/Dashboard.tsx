@@ -4,7 +4,7 @@ import { useCallback, useEffect, useReducer, useState } from "react";
 import { useSSE } from "@/hooks/useSSE";
 import type { MemoPayload, SessionState, SettlementRecord } from "@/lib/shared/types";
 import type { BidStreamEvent } from "@/lib/store/eventBus";
-import { BidFeed, type Round } from "./BidFeed";
+import { BidFeed, type BidRow, type Round } from "./BidFeed";
 import { MemoView } from "./MemoView";
 import { SessionBar } from "./SessionBar";
 import { SettlementFeed } from "./SettlementFeed";
@@ -17,8 +17,8 @@ interface RoundsState {
 
 type RoundsAction =
   | { type: "task.submitted"; taskId: string; prompt: string; budgetUsd: number }
-  | { type: "bid.received"; taskId: string; industryId: string; text: string }
-  | { type: "bid.excluded"; taskId: string; industryId: string; text: string }
+  | { type: "bid.received"; taskId: string; row: Omit<BidRow, "status"> }
+  | { type: "bid.excluded"; taskId: string; industryId: string; reason: string }
   | { type: "decision.made"; taskId: string; winnerIndustryId: string; rejectedForBudget: string[]; suffix: string }
   | { type: "note"; taskId: string; suffix: string };
 
@@ -44,7 +44,7 @@ function roundsReducer(state: RoundsState, action: RoundsAction): RoundsState {
         ...withRound,
         byId: {
           ...withRound.byId,
-          [action.taskId]: { ...round, rows: [...round.rows, { industryId: action.industryId, text: action.text }] },
+          [action.taskId]: { ...round, rows: [...round.rows, { ...action.row, status: "pending" }] },
         },
       };
     case "bid.excluded":
@@ -54,14 +54,14 @@ function roundsReducer(state: RoundsState, action: RoundsAction): RoundsState {
           ...withRound.byId,
           [action.taskId]: {
             ...round,
-            rows: [...round.rows, { industryId: action.industryId, text: action.text, className: "excluded" }],
+            rows: [...round.rows, { industryId: action.industryId, status: "excluded", excludedReason: action.reason }],
           },
         },
       };
     case "decision.made": {
       const rows = round.rows.map((row) => {
-        if (row.industryId === action.winnerIndustryId) return { ...row, className: "winner" };
-        if (action.rejectedForBudget.includes(row.industryId)) return { ...row, className: "rejected" };
+        if (row.industryId === action.winnerIndustryId) return { ...row, status: "winner" as const };
+        if (action.rejectedForBudget.includes(row.industryId)) return { ...row, status: "rejected" as const };
         return row;
       });
       return {
@@ -77,10 +77,6 @@ function roundsReducer(state: RoundsState, action: RoundsAction): RoundsState {
     default:
       return state;
   }
-}
-
-function fmtUsd(n: number): string {
-  return n.toFixed(6);
 }
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
@@ -116,11 +112,18 @@ export function Dashboard() {
         dispatch({
           type: "bid.received",
           taskId: evt.taskId,
-          industryId: b.industryId,
-          text:
-            `${b.industryId} (${b.providerId}/${b.modelId}) — $${fmtUsd(b.estimatedTotalCostUsd)} | ` +
-            `quality ${b.qualityScore.toFixed(2)} | knowledge ${b.knowledgeScore.toFixed(2)} | speed ${b.speedScore.toFixed(2)} | ` +
-            `load ${b.loadScore.toFixed(2)} | error% ${b.errorRatePct.toFixed(1)} | ctx ${b.contextWindowTokens.toLocaleString()}`,
+          row: {
+            industryId: b.industryId,
+            providerId: b.providerId,
+            modelId: b.modelId,
+            estimatedTotalCostUsd: b.estimatedTotalCostUsd,
+            qualityScore: b.qualityScore,
+            knowledgeScore: b.knowledgeScore,
+            speedScore: b.speedScore,
+            loadScore: b.loadScore,
+            errorRatePct: b.errorRatePct,
+            contextWindowTokens: b.contextWindowTokens,
+          },
         });
         break;
       }
@@ -129,7 +132,7 @@ export function Dashboard() {
           type: "bid.excluded",
           taskId: evt.taskId,
           industryId: evt.excluded.industryId,
-          text: `${evt.excluded.industryId} excluded — ${evt.excluded.reason}`,
+          reason: evt.excluded.reason,
         });
         break;
       }
@@ -146,6 +149,7 @@ export function Dashboard() {
       case "settlement.confirmed": {
         setSettlements((prev) => [evt.settlement, ...prev]);
         setMemo(evt.settlement.memo);
+        setSession((prev) => (prev ? { ...prev, spentUsd: prev.spentUsd + evt.settlement.amountUsd } : prev));
         break;
       }
       case "settlement.fallback": {

@@ -1,10 +1,7 @@
 "use client";
 
+import { fmtUsd } from "@/lib/shared/format";
 import type { SessionState } from "@/lib/shared/types";
-
-function fmtUsd(n: number): string {
-  return n.toFixed(6);
-}
 
 export function SessionBar({ session, onResume }: { session: SessionState | null; onResume: () => void }) {
   if (!session) {
@@ -28,7 +25,7 @@ export function SessionBar({ session, onResume }: { session: SessionState | null
           <span className={`badge ${statusClass}`}>{session.status}</span>
         </div>
         <div className="spend-amount">
-          ${fmtUsd(session.spentUsd)} / ${session.capUsd.toFixed(2)}
+          {fmtUsd(session.spentUsd)} / {fmtUsd(session.capUsd)}
         </div>
       </div>
       <div className="spend-bar">
