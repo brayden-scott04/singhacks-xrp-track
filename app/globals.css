@@ -75,7 +75,7 @@ textarea {
   width: 100%;
   min-height: 80px;
   background: #0f151b;
-  color: var(--text);
+  color: #e6edf3;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 10px;
@@ -87,7 +87,7 @@ textarea {
 .form-row label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; color: var(--muted); }
 select, input {
   background: #0f151b;
-  color: var(--text);
+  color: #e6edf3;
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 6px 8px;
@@ -131,6 +131,7 @@ button:hover { filter: brightness(1.1); }
 
 pre#memo-view {
   background: #0f151b;
+  color: #e6edf3;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 12px;

@@ -54,9 +54,9 @@ export function TaskForm({
           <label>
             Complexity
             <select value={complexity} onChange={(e) => setComplexity(e.target.value as ComplexityHint)}>
-              <option value="simple">simple</option>
-              <option value="standard">standard</option>
-              <option value="complex">complex</option>
+              <option value="simple">Simple</option>
+              <option value="standard">Standard</option>
+              <option value="complex">Complex</option>
             </select>
           </label>
           <label>
