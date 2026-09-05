@@ -88,7 +88,7 @@ export const MODEL_PRICING: Record<ProviderId, ModelPricing> = {
     pricePerInputTokenUsd: 0.12 / 1_000_000,
     pricePerOutputTokenUsd: 0.3 / 1_000_000,
     qualityScore: 0.7,
-    qualityJustification: "broad general-purpose tier — versatile across mixed or unclassified tasks, not domain-specialized",
+    qualityJustification: "Broad and general-purpose. Versatile across mixed or unclassified tasks, but not domain-specialised.",
     loadScore: 0.4,
     knowledgeScore: 0.65,
     speedScore: 0.75,

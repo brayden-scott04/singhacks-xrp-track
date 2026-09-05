@@ -8,6 +8,7 @@ import {
   type RoundsAction,
   type RoundsState,
 } from "./roundsReducer";
+import { INDUSTRY_AGENT_IDS } from "@/lib/shared/types";
 import type { DecisionResult, FactorScores, IndustryAgentId, IndustryBid, ScoredIndustryBid } from "@/lib/shared/types";
 
 const FACTORS: FactorScores = {
@@ -78,7 +79,9 @@ describe("roundsReducer", () => {
   it("seeds every industry agent as pending so the auction fills in live", () => {
     const state = run([submitted]);
     const round = state.byId.t1;
-    expect(round.bids).toHaveLength(4);
+    // One slot per registered agent, not a fixed count — the roster grows.
+    expect(round.bids).toHaveLength(INDUSTRY_AGENT_IDS.length);
+    expect(round.bids.map((b) => b.industryId)).toEqual([...INDUSTRY_AGENT_IDS]);
     expect(round.bids.every((b) => b.outcome === "pending")).toBe(true);
     expect(round.phase).toBe("bidding");
   });
