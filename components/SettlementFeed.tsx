@@ -67,11 +67,12 @@ export function SettlementFeed({ settlements }: { settlements: SettlementRecord[
 
       <p className="legend">
         <span>
-          <strong>channel</strong> — an off-chain cumulative claim redeemed on-ledger, the cheap path for repeat
-          payments to the same agent.
+          <strong>channel</strong> is an off-chain running total, redeemed on the ledger. It is the cheap way to
+          pay the same agent repeatedly.
         </span>
         <span>
-          <strong>payment · fallback</strong> — a discrete Payment, used automatically when the channel path throws.
+          <strong>payment · fallback</strong> is a one-off Payment. It happens automatically when the channel
+          path fails.
         </span>
       </p>
     </section>

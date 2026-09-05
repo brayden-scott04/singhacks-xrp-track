@@ -26,18 +26,18 @@ export function DecisionPanel({ round }: { round: Round }) {
         </p>
 
         {decision.overrodePrior ? (
-          <Pill tone="info" icon={BoltIcon} title="The decision agent chose against the deterministic ranking">
-            LLM override — prior ranked {decision.priorTopIndustryId} #1
+          <Pill tone="info" icon={BoltIcon} title="The decision agent picked someone other than the top-scoring agent">
+            Override: the score ranked {decision.priorTopIndustryId} first
           </Pill>
         ) : (
           <Pill tone="neutral" icon={CheckIcon}>
-            Agreed with the deterministic prior
+            Agreed with the score
           </Pill>
         )}
       </div>
 
-      {/* The reason string lives only in the sidebar memo — it is the same
-          text as memo.winningReason, and showing it twice was noise. */}
+      {/* The reason string lives only in the sidebar memo. It is the same
+          text as memo.winningReason, so showing it here too was noise. */}
       {winner?.scored ? <ContributionBar factorScores={winner.scored.factorScores} /> : null}
 
       <div className="matrix-only-wide">
@@ -47,11 +47,11 @@ export function DecisionPanel({ round }: { round: Round }) {
         <FactorStack bids={scored} winnerIndustryId={decision.winnerIndustryId} />
       </div>
 
-      <Disclosure summary="How the deterministic prior is computed">
+      <Disclosure summary="How the score is worked out">
         <p>
-          Each bid&rsquo;s seven factors are normalised to 0&ndash;1 for the round (higher is always better), then
-          blended by fixed weights into a composite. That composite is a <em>prior</em>: the decision agent sees it
-          alongside the task text and may override it, as it did whenever the badge above says so.
+          Every bid gets seven scores from 0 to 1, where higher is always better. Those are weighted and added
+          into one composite score. The composite is only a starting point: the decision agent also reads the task
+          itself, and can pick someone else.
         </p>
         <ul className="weight-list" role="list">
           {FACTOR_ORDER.map((key) => (
@@ -62,8 +62,8 @@ export function DecisionPanel({ round }: { round: Round }) {
           ))}
         </ul>
         <p className="field-hint">
-          <InfoIcon size={12} /> Price is scored relative to the round&rsquo;s most expensive bid, so the priciest
-          bidder always scores 0 on price. Context is relative to the largest window in the round.
+          <InfoIcon size={12} /> Price is scored against the most expensive bid in the round, so the priciest
+          bidder always scores 0. Context works the same way, against the largest window.
         </p>
       </Disclosure>
     </section>

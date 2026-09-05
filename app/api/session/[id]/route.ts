@@ -5,7 +5,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params;
   const session = await getSession(id);
   if (!session) {
-    return NextResponse.json({ error: "unknown session" }, { status: 404 });
+    return NextResponse.json({ error: "Unknown session." }, { status: 404 });
   }
   const settlements = await getSettlements(id);
   return NextResponse.json({ session, settlements });

@@ -39,6 +39,17 @@ npm install
 cp .env.example .env
 ```
 
+If `npm install` fails trying to compile `better-sqlite3` (a `node-gyp`
+error about missing Visual Studio / build tools — npm auto-runs `node-gyp
+rebuild` for any package with a `binding.gyp`, even though this one already
+ships a working prebuilt binary for common platforms), skip lifecycle
+scripts and run esbuild's own installer directly instead:
+
+```bash
+npm install --ignore-scripts
+node node_modules/esbuild/install.js
+```
+
 Fill in `.env`:
 
 - `OPENROUTER_API_KEY` — all five bidding providers call OpenRouter's

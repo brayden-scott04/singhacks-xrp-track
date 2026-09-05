@@ -169,19 +169,21 @@ export const CpuIcon = (p: IconProps) => (
   </Svg>
 );
 
-export const GlobeIcon = (p: IconProps) => (
+export const LayersIcon = (p: IconProps) => (
   <Svg {...p}>
-    <circle cx="12" cy="12" r="9" />
-    <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" />
+    <path d="m12 2 9 5-9 5-9-5 9-5Z" />
+    <path d="m3 12 9 5 9-5M3 17l9 5 9-5" />
   </Svg>
 );
 
+// Exhaustive over IndustryAgentId on purpose: adding an agent should fail the
+// typecheck here rather than silently fall back to a generic dot.
 const INDUSTRY_ICONS: Record<IndustryAgentId, (p: IconProps) => React.JSX.Element> = {
   legal: ScaleIcon,
   healthcare: HeartPulseIcon,
   finance: TrendingUpIcon,
   technology: CpuIcon,
-  general: GlobeIcon,
+  general: LayersIcon,
 };
 
 export function IndustryIcon({ industryId, ...rest }: IconProps & { industryId: IndustryAgentId }) {

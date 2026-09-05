@@ -1,9 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { useSSE, type SseStatus } from "@/hooks/useSSE";
 import type { SessionState, SettlementRecord } from "@/lib/shared/types";
 import type { BidStreamEvent } from "@/lib/store/eventBus";
+import { INDUSTRY_AGENT_IDS } from "@/lib/shared/types";
+import { titleCaseId } from "./format";
 import { AlertIcon, DotIcon } from "./icons";
 import { EmptyState, Pill } from "./ui";
 import { MemoView } from "./MemoView";
@@ -14,14 +17,17 @@ import { TaskForm } from "./TaskForm";
 import { ThemeToggle } from "./ThemeToggle";
 import { initialRoundsState, roundsReducer } from "./roundsReducer";
 
+// Derived, not hardcoded: this sentence already went stale once when a fifth
+// agent was added.
 const TAGLINE =
-  "Four industry agents bid via HTTP 402. A decision agent picks the winner. XRPL settles it, and every payment carries its own justification.";
+  `${INDUSTRY_AGENT_IDS.length} industry agents bid on every task using HTTP 402. A decision agent picks the winner, ` +
+  "XRPL pays them, and every payment records why it was made.";
 
 async function parseJsonOrThrow<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => null);
   if (!res.ok) {
     const message =
-      body && typeof body === "object" && "error" in body ? String(body.error) : `request failed (${res.status})`;
+      body && typeof body === "object" && "error" in body ? String(body.error) : `Request failed (${res.status}).`;
     throw new Error(message);
   }
   return body as T;
@@ -77,7 +83,7 @@ export function Dashboard() {
         break;
       case "decision.made":
         dispatch({ type: "decision.made", taskId: evt.taskId, decision: evt.decision, at });
-        setLiveMessage(`${evt.decision.winner.industryId} agent won the auction`);
+        setLiveMessage(`${titleCaseId(evt.decision.winner.industryId)} agent won the auction`);
         break;
       case "settlement.started":
         dispatch({
@@ -98,7 +104,7 @@ export function Dashboard() {
         // warning or paused, so without this the spend bar reads $0.00 for
         // an entire demo. A resync corrects any drift.
         setSession((prev) => (prev ? { ...prev, spentUsd: prev.spentUsd + evt.settlement.amountUsd } : prev));
-        setLiveMessage(`Settled on XRPL to the ${evt.settlement.industryId} agent`);
+        setLiveMessage(`Settled on XRPL to the ${titleCaseId(evt.settlement.industryId)} agent`);
         break;
       case "task.completed":
         dispatch({ type: "task.completed", taskId: evt.taskId, output: evt.output, at });
@@ -170,6 +176,31 @@ export function Dashboard() {
   const orderedRounds = useMemo(() => rounds.order.map((id) => rounds.byId[id]), [rounds]);
   const latestMemo = settlements[0]?.memo ?? null;
 
+  // Exactly one round is open at a time; the rest collapse to pills.
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const newestTaskId = rounds.order[0] ?? null;
+
+  // Keyed on the newest id, not on `rounds` — keying on the object would re-fire
+  // on every incoming bid and settlement event and fight the user's clicks.
+  useEffect(() => {
+    if (newestTaskId) setExpandedTaskId(newestTaskId);
+  }, [newestTaskId]);
+
+  // The settlement rail links back with #round-<taskId>. Without this, those
+  // links land on a collapsed pill and dead-end.
+  useEffect(() => {
+    function expandFromHash() {
+      const match = /^#round-(.+)$/.exec(window.location.hash);
+      if (match) setExpandedTaskId(match[1]);
+    }
+    window.addEventListener("hashchange", expandFromHash);
+    return () => window.removeEventListener("hashchange", expandFromHash);
+  }, []);
+
+  const toggleRound = useCallback((taskId: string) => {
+    setExpandedTaskId((prev) => (prev === taskId ? null : taskId));
+  }, []);
+
   return (
     <>
       <header className="app-head">
@@ -179,6 +210,9 @@ export function Dashboard() {
         </div>
         <div className="app-head-actions">
           <ConnectionPill status={sseStatus} />
+          <Link className="btn-ghost" href="/history">
+            History
+          </Link>
           <ThemeToggle />
         </div>
       </header>
@@ -201,10 +235,17 @@ export function Dashboard() {
             {orderedRounds.length === 0 ? (
               <EmptyState
                 title="No auctions yet"
-                hint="Submit a task and four industry agents will bid on it in parallel."
+                hint={`Submit a task and all ${INDUSTRY_AGENT_IDS.length} industry agents will bid on it in parallel.`}
               />
             ) : (
-              orderedRounds.map((round) => <RoundCard key={round.taskId} round={round} />)
+              orderedRounds.map((round) => (
+                <RoundCard
+                  key={round.taskId}
+                  round={round}
+                  expanded={round.taskId === expandedTaskId}
+                  onToggle={() => toggleRound(round.taskId)}
+                />
+              ))
             )}
           </section>
         </main>

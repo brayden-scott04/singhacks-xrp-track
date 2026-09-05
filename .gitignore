@@ -8,6 +8,9 @@ dist/
 # XRPL feedback hook identity config (project-scoped variant)
 hook/.xrpl-feedback-hook.json
 
+# task history SQLite db (lib/store/historyStore.ts) — local run state, not source
+/data/
+
 # Next.js
 /.next/
 /out/
